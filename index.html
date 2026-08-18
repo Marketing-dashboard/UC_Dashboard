@@ -1,688 +1,1352 @@
 ﻿<!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+
 <meta http-equiv="Pragma" content="no-cache">
+
 <meta http-equiv="Expires" content="0">
+
 <title>Used Cars — City & Campaign Performance</title>
+
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
+
+
 :root {
+
   --bg:#F0F2F5; --surface:#fff; --surface2:#F7F8FA;
+
   --border:#E4E7EC; --border2:#D0D5DD;
+
   --text:#101828; --text2:#475467; --text3:#98A2B3;
+
   --navy:#1D2939; --navy2:#344054;
+
   --ahm:#7C3AED; --ahm-light:#F5F3FF; --ahm-border:#C4B5FD;
+
   --chd:#0369A1; --chd-light:#EFF6FF; --chd-border:#BAE6FD;
+
   --nas:#047857; --nas-light:#ECFDF5; --nas-border:#6EE7B7;
+
   --google:#EA4335; --google-light:#FEF2F2; --google-border:#FCA5A5;
+
   --meta:#1877F2; --meta-light:#EFF6FF; --meta-border:#93C5FD;
+
   --cat:#D97706; --cat-light:#FFFBEB;
+
   --lead:#0891B2; --lead-light:#ECFEFF;
+
   --search:#7C3AED; --search-light:#F5F3FF;
+
   --demand:#059669; --demand-light:#ECFDF5;
+
   --r:10px; --rl:14px;
+
 }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
 .page{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
 
+
+
 /* ── Auth Gate ── */
+
 .auth-gate{position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:2000}
+
 .auth-card{background:#fff;border-radius:16px;padding:44px 40px;max-width:400px;width:92%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
+
 .auth-logo{width:56px;height:56px;background:var(--navy);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px}
+
 .auth-card h2{font-size:19px;font-weight:700;color:var(--navy);margin-bottom:8px}
+
 .auth-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+
 .auth-btn{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:13px 20px;font-size:14px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s}
+
 .auth-btn:hover{background:#2d3f55}
+
 .auth-btn:disabled{opacity:0.55;cursor:default}
+
 .auth-btn svg{flex-shrink:0}
+
 .auth-error{color:#c0392b;font-size:12px;margin-top:14px;line-height:1.5}
+
 .auth-info-box{background:#F0F2F5;border-radius:8px;padding:12px 16px;margin-top:16px;font-size:12px;color:var(--text2);line-height:1.6;text-align:left}
+
 .auth-info-box strong{color:var(--text)}
+
 .auth-signout-top{position:fixed;top:14px;right:18px;font-size:12px;color:var(--text2);background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 16px;cursor:pointer;z-index:1999;display:none;font-family:inherit}
+
 .auth-signout-top:hover{background:var(--bg)}
 
+
+
 /* ── Admin request panel ── */
+
 .req-panel{position:fixed;bottom:20px;right:20px;width:390px;background:#fff;border-radius:14px;box-shadow:0 6px 30px rgba(0,0,0,0.18);z-index:1900;display:none;overflow:hidden}
+
 .req-panel-hdr{background:var(--navy);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+
 .req-panel-title{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+
 .req-badge{background:#E8650A;color:#fff;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700}
+
 .req-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface2)}
+
 .req-tab{flex:1;padding:8px;font-size:12px;font-weight:600;color:var(--text2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;transition:color .15s}
+
 .req-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+
 .req-body{max-height:320px;overflow-y:auto}
+
 .req-item{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+
 .req-item:last-child{border-bottom:none}
+
 .req-avatar{width:34px;height:34px;border-radius:50%;background:var(--bg);flex-shrink:0;object-fit:cover}
+
 .req-info{flex:1;min-width:0}
+
 .req-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .req-email{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .req-time{font-size:10px;color:var(--text3)}
+
 .req-actions{display:flex;gap:5px;flex-shrink:0}
+
 .btn-approve{background:#047857;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+
 .btn-approve:hover{background:#035c43}
+
 .btn-reject{background:#fdecea;color:#c0392b;border:1px solid #f5c6c6;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+
 .btn-reject:hover{background:#f5c6c6}
+
 .btn-revoke{background:#fff3eb;color:#b45309;border:1px solid #fbbf24;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+
 .btn-revoke:hover{background:#fde68a}
+
 .req-empty{padding:22px;text-align:center;color:var(--text3);font-size:13px}
 
+
+
 /* ── Header ── */
+
 .topbar{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+
 .logo{width:44px;height:44px;background:var(--navy);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
 .logo svg{width:24px;height:24px;fill:#fff}
+
 .title-block h1{font-size:20px;font-weight:700;color:var(--navy)}
+
 .title-block p{font-size:12px;color:var(--text2);margin-top:2px}
+
 .period-badge{margin-left:auto;background:var(--navy);color:#fff;font-size:11px;font-weight:600;padding:5px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.04em}
 
+
+
 /* ── Date filter bar ── */
+
 .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
 .filter-bar label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap}
+
 .date-input{font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer}
+
 .date-input:focus{outline:2px solid var(--navy);outline-offset:1px}
+
 .filter-sep{color:var(--text3);font-size:13px}
+
 .filter-reset{margin-left:auto;font-size:12px;color:var(--text2);background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:inherit}
+
 .filter-reset:hover{background:var(--bg)}
+
 .filter-active-badge{font-size:11px;font-weight:600;color:#0369A1;background:#EFF6FF;border:1px solid #BAE6FD;border-radius:20px;padding:3px 10px;white-space:nowrap}
+
 .no-data-msg{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
+
 .no-data-msg strong{display:block;font-size:16px;color:var(--text2);margin-bottom:6px}
 
+
+
 /* ── Tabs ── */
+
 .tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:26px}
+
 .tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:inherit;margin-bottom:-2px;transition:color .15s;white-space:nowrap}
+
 .tab.active{color:var(--navy);font-weight:700;border-bottom-color:var(--navy)}
+
 .tab:hover:not(.active){color:var(--text)}
 
+
+
 /* ── Summary strip ── */
+
 .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:22px}
+
 .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+
 .sum-label{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+
 .sum-val{font-size:22px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace}
+
 .sum-sub{font-size:11px;color:var(--text3);margin-top:2px}
 
+
+
 /* ── City cards ── */
+
 .city-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+
 @media(max-width:860px){.city-grid{grid-template-columns:1fr}}
+
 .city-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+
 .city-hdr{padding:14px 18px;display:flex;align-items:center;gap:10px}
+
 .city-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
 .city-hdr-name{font-size:15px;font-weight:700}
+
 .city-hdr-total{margin-left:auto;font-size:12px;font-family:'DM Mono',monospace;font-weight:600}
+
 .city-body{padding:14px 18px 18px}
+
 .kpi-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+
 .kpi-pill{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600}
+
 .plat-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+
 .plat-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600}
+
 .divider{height:1px;background:var(--border);margin:10px 0}
+
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
 .metric{background:var(--surface2);border-radius:7px;padding:9px 11px;border:1px solid var(--border)}
+
 .metric-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+
 .metric-val{font-size:16px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace}
+
 .metric-sub{font-size:10px;color:var(--text2);margin-top:1px}
 
+
+
 /* ── Table ── */
+
 .tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:20px}
+
 .tbl-toolbar{padding:13px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
 .tbl-title{font-size:14px;font-weight:700;color:var(--navy)}
+
 .tbl-sub{font-size:11px;color:var(--text2)}
+
 .filters{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
 .fsel{font-size:12px;padding:5px 9px;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer}
+
 .tbl-wrap{overflow-x:auto}
+
 table{width:100%;border-collapse:separate;border-spacing:0}
+
 thead tr{background:var(--surface2)}
+
 th{padding:9px 12px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;text-align:right;white-space:nowrap;border-bottom:2px solid var(--border2);background:var(--surface2)}
+
 th.left{text-align:left}
+
 th.center{text-align:center}
+
 th.sticky{position:sticky;z-index:3;background:var(--surface2);box-shadow:2px 0 4px rgba(0,0,0,.06)}
+
 td{padding:9px 12px;font-size:12px;border-bottom:1px solid #F2F4F7;text-align:right;white-space:nowrap;font-family:'DM Mono',monospace;color:var(--text);background:inherit}
+
 td.left{text-align:left;font-family:'Inter',system-ui;font-size:12px}
+
 td.center{text-align:center;font-family:'Inter',system-ui}
+
 td.sticky{position:sticky;z-index:2;background:var(--surface);box-shadow:2px 0 4px rgba(0,0,0,.05)}
+
 tbody tr:hover td{background:#FAFAFA}
+
 tbody tr:hover td.sticky{background:#FAFAFA}
+
 tr:last-child td{border-bottom:none}
+
 tfoot td{font-weight:700;background:var(--navy);color:#fff;border-top:2px solid var(--navy2);font-size:12px}
+
 tfoot td.sticky{background:var(--navy);box-shadow:2px 0 4px rgba(0,0,0,.15)}
+
 .city-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;font-family:'Inter',system-ui}
+
 .plat-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;font-family:'Inter',system-ui}
+
 .type-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600;font-family:'Inter',system-ui}
+
 .status-ongoing{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;font-family:'Inter',system-ui;background:#ECFDF5;color:#047857;border:1px solid #6EE7B7;white-space:nowrap}
+
 .status-exp-ongoing{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;font-family:'Inter',system-ui;background:#FEF9C3;color:#854D0E;border:1px solid #FDE047;white-space:nowrap}
+
 .status-exp-paused{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;font-family:'Inter',system-ui;background:#F1F5F9;color:#64748B;border:1px solid #CBD5E1;white-space:nowrap}
 
+
+
 /* ── Campaign type comparison ── */
+
 .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+
 @media(max-width:740px){.type-grid{grid-template-columns:1fr}}
+
 .type-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+
 .type-hdr{padding:12px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border)}
+
 .type-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+
 .type-hdr-name{font-size:13px;font-weight:700}
+
 .type-hdr-plat{font-size:10px;font-weight:600;margin-top:1px}
+
 .type-body{padding:14px 16px}
+
 .type-city-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border)}
+
 .type-city-row:last-child{margin-bottom:0}
+
 .tcr-name{font-size:12px;font-weight:700;width:90px;flex-shrink:0}
+
 .tcr-bar-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+
 .tcr-bar{height:100%;border-radius:3px;transition:width .3s}
+
 .tcr-vals{display:flex;gap:8px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);white-space:nowrap}
+
 .tcr-val strong{color:var(--text);font-weight:700}
+
 .empty{padding:36px;text-align:center;color:var(--text3);font-size:13px}
+
 .pane{display:none}
+
 .pane.active{display:block}
+
 </style>
+
 </head>
+
 <body>
 
+
+
 <!-- ── AUTH GATE ── -->
+
 <div id="auth-gate" class="auth-gate">
+
   <div class="auth-card">
+
     <div class="auth-logo" id="auth-icon">🚗</div>
+
     <h2 id="auth-title">Used Cars Dashboard</h2>
+
     <p id="auth-desc">Sign in with your <strong>@girnarsoft.com</strong> Google account to access this dashboard.</p>
+
     <button id="auth-signin-btn" class="auth-btn" type="button">
+
       <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+
       Sign in with Google
+
     </button>
+
     <p id="auth-error" class="auth-error" style="display:none"></p>
+
     <div id="auth-info-box" class="auth-info-box" style="display:none"></div>
+
   </div>
+
 </div>
+
+
 
 <button id="auth-signout-btn" class="auth-signout-top" type="button">Sign out</button>
 
+
+
 <!-- ── ADMIN REQUESTS PANEL ── -->
+
 <div id="req-panel" class="req-panel">
+
   <div class="req-panel-hdr" id="req-panel-hdr">
+
     <span class="req-panel-title">Access Manager <span class="req-badge" id="req-badge">0</span></span>
+
     <span id="req-chevron" style="font-size:16px">▲</span>
+
   </div>
+
   <div class="req-tabs" id="req-tabs" style="display:none">
+
     <button class="req-tab active" id="tab-pending-btn" onclick="switchReqTab('pending')">Pending</button>
+
     <button class="req-tab" id="tab-approved-btn" onclick="switchReqTab('approved')">Approved Users</button>
+
   </div>
+
   <div class="req-body" id="req-body">
+
     <div class="req-empty">No pending requests</div>
+
   </div>
+
 </div>
+
+
 
 <!-- ── DASHBOARD ── -->
+
 <div id="dashboard-app" style="display:none">
+
 <div class="page">
 
+
+
 <div class="topbar">
+
   <div class="logo">
+
     <svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3m-4 12H9a2 2 0 01-2-2v-5a2 2 0 012-2h11a2 2 0 012 2v5a2 2 0 01-2 2h-2m-5-4l2 2 4-4"/></svg>
+
   </div>
+
   <div class="title-block">
+
     <h1>Used Cars — Performance Dashboard</h1>
+
     <p>Ahmedabad &nbsp;·&nbsp; Chandigarh &nbsp;·&nbsp; Nashik &nbsp;·&nbsp; Google + Meta</p>
+
   </div>
+
   <div class="period-badge" id="period-badge">Jul 1–15, 2026</div>
+
 </div>
+
+
 
 <!-- ── DATE FILTER ── -->
+
 <div class="filter-bar">
+
   <label for="date-start">📅 Date Range</label>
+
   <input type="date" id="date-start" class="date-input" min="2026-04-06">
+
   <span class="filter-sep">→</span>
+
   <input type="date" id="date-end" class="date-input" min="2026-04-06">
+
   <span id="filter-active-badge" class="filter-active-badge" style="display:none">Filtered</span>
+
   <button class="filter-reset" id="filter-reset-btn" onclick="resetDateFilter()">Reset</button>
+
 </div>
+
+
 
 <div class="tabs">
+
   <button class="tab active" onclick="switchTab('overview')">Overview</button>
+
   <button class="tab" onclick="switchTab('city')">City Comparison</button>
+
   <button class="tab" onclick="switchTab('campaigns')">Campaign Detail</button>
+
   <button class="tab" onclick="switchTab('comparison')">Trend &amp; Comparison</button>
+
 </div>
 
+
+
 <div id="pane-overview" class="pane active"></div>
+
 <div id="pane-city"     class="pane"></div>
+
 <div id="pane-campaigns" class="pane"></div>
+
 <div id="pane-comparison" class="pane"></div>
 
+
+
 </div><!-- /.page -->
+
 </div><!-- /#dashboard-app -->
 
+
+
 <!-- ── FIREBASE AUTH ── -->
+
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, onSnapshot, updateDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
+
+
 const FIREBASE_CONFIG = {
+
   apiKey: "AIzaSyBIlNAa_Uzr-r4ZQNJI4dEFJCAOfo6n5Wg",
+
   authDomain: "uc-dashboard-v2.firebaseapp.com",
+
   projectId: "uc-dashboard-v2",
+
   storageBucket: "uc-dashboard-v2.firebasestorage.app",
+
   messagingSenderId: "606719544916",
+
   appId: "1:606719544916:web:209d3fea52353716da27c1"
+
 };
 
+
+
 const ADMINS        = ["deepanshi.ahuja@girnarsoft.com", "neeraj.khichi@girnarsoft.com"];
+
 const ALLOWED_DOMAIN = "girnarsoft.com";
+
 const COL_REQUESTS  = 'access_requests';
+
 const COL_APPROVED  = 'approved_emails';
 
+
+
 const app      = initializeApp(FIREBASE_CONFIG);
+
 const auth     = getAuth(app);
+
 const db       = getFirestore(app);
+
 const provider = new GoogleAuthProvider();
 
+
+
 const gate        = document.getElementById('auth-gate');
+
 const dashboard   = document.getElementById('dashboard-app');
+
 const signinBtn   = document.getElementById('auth-signin-btn');
+
 const errorEl     = document.getElementById('auth-error');
+
 const infoBox     = document.getElementById('auth-info-box');
+
 const signoutBtn  = document.getElementById('auth-signout-btn');
+
 const authIcon    = document.getElementById('auth-icon');
+
 const authTitle   = document.getElementById('auth-title');
+
 const authDesc    = document.getElementById('auth-desc');
+
 const reqPanel    = document.getElementById('req-panel');
+
 const reqBody     = document.getElementById('req-body');
+
 const reqBadge    = document.getElementById('req-badge');
+
 const reqPanelHdr = document.getElementById('req-panel-hdr');
+
 const reqChevron  = document.getElementById('req-chevron');
+
 const reqTabsEl   = document.getElementById('req-tabs');
+
+
 
 const GOOGLE_SVG = `<svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>`;
 
+
+
 let reqOpen    = true;
+
 let reqUnsub   = null;
+
 let pendingReqs = [];
+
 let activeReqTab = 'pending';
 
+
+
 // ── Panel collapse/expand ──
+
 reqPanelHdr.addEventListener('click', () => {
+
   reqOpen = !reqOpen;
+
   reqBody.style.display    = reqOpen ? 'block' : 'none';
+
   reqTabsEl.style.display  = reqOpen ? 'flex'  : 'none';
+
   reqChevron.textContent   = reqOpen ? '▲' : '▼';
+
 });
 
+
+
 // ── Sign-in button ──
+
 signinBtn.addEventListener('click', () => {
+
   errorEl.style.display = 'none';
+
   signinBtn.disabled = true;
+
   signinBtn.innerHTML = GOOGLE_SVG + ' Signing in…';
+
   signInWithPopup(auth, provider).catch(err => {
+
     let msg = 'Sign-in failed. Please try again.';
+
     if (err.code === 'auth/popup-blocked')    msg = 'Pop-up was blocked. Please allow pop-ups for this site.';
+
     if (err.code === 'auth/popup-closed-by-user') msg = 'Sign-in cancelled.';
+
     errorEl.textContent = msg;
+
     errorEl.style.display = 'block';
+
     signinBtn.disabled = false;
+
     signinBtn.innerHTML = GOOGLE_SVG + ' Sign in with Google';
+
   });
+
 });
+
+
 
 signoutBtn.addEventListener('click', () => signOut(auth));
 
+
+
 // ── Auth screens ──
+
 function showSignIn(msg) {
+
   gate.style.display  = 'flex';
+
   dashboard.style.display = 'none';
+
   authIcon.textContent = '🚗';
+
   authTitle.textContent = 'Used Cars Dashboard';
+
   authDesc.innerHTML = 'Sign in with your <strong>@girnarsoft.com</strong> Google account to access this dashboard.';
+
   signinBtn.style.display = 'flex';
+
   signinBtn.disabled = false;
+
   signinBtn.innerHTML = GOOGLE_SVG + ' Sign in with Google';
+
   errorEl.style.display = 'none';
+
   infoBox.style.display = 'none';
+
   signoutBtn.style.display = 'none';
+
   if (msg) { infoBox.innerHTML = msg; infoBox.style.display = 'block'; }
+
 }
+
+
 
 function showPending(user) {
+
   gate.style.display  = 'flex';
+
   dashboard.style.display = 'none';
+
   authIcon.textContent = '⏳';
+
   authTitle.textContent = 'Access Requested';
+
   authDesc.textContent = 'Your request has been sent to the admins for approval.';
+
   signinBtn.style.display = 'none';
+
   errorEl.style.display = 'none';
+
   infoBox.innerHTML = `Signed in as <strong>${user.email}</strong>.<br>You'll gain access once an admin approves your request.`;
+
   infoBox.style.display = 'block';
+
   signoutBtn.style.display = 'block';
+
 }
+
+
 
 function showRevoked(user) {
+
   gate.style.display  = 'flex';
+
   dashboard.style.display = 'none';
+
   authIcon.textContent = '🔒';
+
   authTitle.textContent = 'Access Revoked';
+
   authDesc.textContent = 'Your access to this dashboard has been removed by an admin.';
+
   signinBtn.style.display = 'none';
+
   errorEl.style.display = 'none';
+
   infoBox.innerHTML = `Signed in as <strong>${user.email}</strong>.`;
+
   infoBox.style.display = 'block';
+
   signoutBtn.style.display = 'block';
+
+
 
   // Show a re-request button
+
   let reReqBtn = document.getElementById('re-request-btn');
+
   if (!reReqBtn) {
+
     reReqBtn = document.createElement('button');
+
     reReqBtn.id = 're-request-btn';
+
     reReqBtn.className = 'auth-btn';
+
     reReqBtn.style.marginTop = '14px';
+
     reReqBtn.textContent = 'Request Access Again';
+
     infoBox.parentNode.insertBefore(reReqBtn, infoBox.nextSibling);
+
   }
+
   reReqBtn.style.display = 'flex';
+
   reReqBtn.onclick = async () => {
+
     reReqBtn.disabled = true;
+
     reReqBtn.textContent = 'Sending request…';
+
     try {
+
       await deleteDoc(doc(db, COL_REQUESTS, user.email.toLowerCase()));
+
       // Re-trigger auth flow which will now submit a fresh request
+
       await setDoc(doc(db, COL_REQUESTS, user.email.toLowerCase()), {
+
         email: user.email,
+
         name: user.displayName || '',
+
         photo: user.photoURL || '',
+
         status: 'pending',
+
         requestedAt: serverTimestamp()
+
       });
+
       authTitle.textContent = 'Request Sent';
+
       authDesc.textContent = 'Your access request has been sent to an admin for review.';
+
       reReqBtn.style.display = 'none';
+
       infoBox.innerHTML = `Signed in as <strong>${user.email}</strong>.<br>You will be able to access the dashboard once an admin approves your request.`;
+
     } catch(e) {
+
       reReqBtn.disabled = false;
+
       reReqBtn.textContent = 'Request Access Again';
+
       errorEl.textContent = 'Error sending request: ' + e.message;
+
       errorEl.style.display = 'block';
+
     }
+
   };
+
 }
+
+
 
 function showDenied(user) {
+
   gate.style.display  = 'flex';
+
   dashboard.style.display = 'none';
+
   authIcon.textContent = '🚫';
+
   authTitle.textContent = 'Access Denied';
+
   authDesc.textContent = 'Your access request was not approved.';
+
   signinBtn.style.display = 'none';
+
   errorEl.style.display = 'none';
+
   infoBox.innerHTML = `Signed in as <strong>${user.email}</strong>.<br>Contact an admin if you believe this is a mistake.`;
+
   infoBox.style.display = 'block';
+
   signoutBtn.style.display = 'block';
+
 }
+
+
 
 // ── Admin panel tab switch ──
+
 window.switchReqTab = (tab) => {
+
   activeReqTab = tab;
+
   document.getElementById('tab-pending-btn').classList.toggle('active', tab === 'pending');
+
   document.getElementById('tab-approved-btn').classList.toggle('active', tab === 'approved');
+
   if (tab === 'pending') renderPendingTab();
+
   else renderApprovedTab();
+
 };
+
+
 
 function renderPendingTab() {
+
   if (!pendingReqs.length) {
+
     reqBody.innerHTML = '<div class="req-empty">No pending requests</div>';
+
     return;
+
   }
+
   reqBody.innerHTML = pendingReqs.map((r, i) => {
+
     const time = r.requestedAt ? new Date(r.requestedAt.seconds * 1000).toLocaleString('en-IN') : '';
+
     return `<div class="req-item" data-idx="${i}">
+
       <img class="req-avatar" src="${r.photoURL || ''}" onerror="this.style.display='none'" alt="">
+
       <div class="req-info">
+
         <div class="req-name">${r.name || 'Unknown'}</div>
+
         <div class="req-email" title="${r.email}">${r.email}</div>
+
         <div class="req-time">${time}</div>
+
       </div>
+
       <div class="req-actions">
+
         <button class="btn-approve" onclick="approveReq(${i})">Approve</button>
+
         <button class="btn-reject"  onclick="rejectReq(${i})">Reject</button>
+
       </div>
+
     </div>`;
+
   }).join('');
+
 }
+
+
 
 async function renderApprovedTab() {
+
   reqBody.innerHTML = '<div class="req-empty">Loading…</div>';
+
   try {
+
     const snap = await getDocs(collection(db, COL_APPROVED));
+
     const users = [];
+
     snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+
     users.sort((a, b) => (a.email || '').localeCompare(b.email || ''));
+
     if (!users.length) {
+
       reqBody.innerHTML = '<div class="req-empty">No approved users yet</div>';
+
       return;
+
     }
+
     reqBody.innerHTML = users.map((u, i) => {
+
       const time = u.approvedAt ? new Date(u.approvedAt.seconds * 1000).toLocaleDateString('en-IN') : '';
+
       return `<div class="req-item" data-approved-idx="${i}">
+
         <div class="req-info">
+
           <div class="req-name">${u.email}</div>
+
           <div class="req-time">Approved ${time}${u.approvedBy ? ' by ' + u.approvedBy : ''}</div>
+
         </div>
+
         <div class="req-actions">
+
           <button class="btn-revoke" onclick="revokeAccess('${u.email}', '${u.id}')">Revoke</button>
+
         </div>
+
       </div>`;
+
     }).join('');
+
   } catch(e) {
+
     reqBody.innerHTML = '<div class="req-empty">Error loading users</div>';
+
   }
+
 }
+
+
 
 // ── Admin listener (pending requests real-time) ──
+
 function startAdminListener() {
+
   if (reqUnsub) return;
+
   const q = query(collection(db, COL_REQUESTS), where('status', '==', 'pending'));
+
   reqUnsub = onSnapshot(q, snap => {
+
     pendingReqs = [];
+
     snap.forEach(d => pendingReqs.push({ id: d.id, ...d.data() }));
+
     pendingReqs.sort((a, b) => (a.requestedAt?.seconds || 0) - (b.requestedAt?.seconds || 0));
+
     reqBadge.textContent = pendingReqs.length;
+
     reqBadge.style.display = pendingReqs.length ? 'inline' : 'none';
+
     reqPanel.style.display = 'block';
+
     reqTabsEl.style.display = reqOpen ? 'flex' : 'none';
+
     if (activeReqTab === 'pending') renderPendingTab();
+
   }, err => {
+
     console.error('Firestore listener error:', err);
+
   });
+
 }
 
+
+
 // ── Approve ──
+
 window.approveReq = async (idx) => {
+
   const r = pendingReqs[idx];
+
   if (!r) return;
+
   const item = document.querySelector(`.req-item[data-idx="${idx}"]`);
+
   if (item) item.querySelectorAll('button').forEach(b => { b.disabled = true; b.textContent = '…'; });
+
   try {
+
     await setDoc(doc(db, COL_APPROVED, r.id), {
+
       email: r.email, approvedAt: serverTimestamp(), approvedBy: auth.currentUser?.email || ''
+
     });
+
     await updateDoc(doc(db, COL_REQUESTS, r.id), { status: 'approved' });
+
   } catch(e) {
+
     if (item) item.querySelectorAll('button').forEach(b => { b.disabled = false; });
+
     alert('Error approving: ' + e.message);
+
   }
+
 };
+
+
 
 // ── Reject ──
+
 window.rejectReq = async (idx) => {
+
   const r = pendingReqs[idx];
+
   if (!r) return;
+
   const item = document.querySelector(`.req-item[data-idx="${idx}"]`);
+
   if (item) item.querySelectorAll('button').forEach(b => { b.disabled = true; b.textContent = '…'; });
+
   try {
+
     await updateDoc(doc(db, COL_REQUESTS, r.id), { status: 'rejected' });
+
   } catch(e) {
+
     if (item) item.querySelectorAll('button').forEach(b => { b.disabled = false; });
+
     alert('Error rejecting: ' + e.message);
+
   }
+
 };
+
+
 
 // ── Revoke access ──
+
 window.revokeAccess = async (email, docId) => {
+
   if (!confirm(`Revoke access for ${email}?`)) return;
+
   const btn = event.target;
+
   btn.disabled = true; btn.textContent = '…';
+
   try {
+
     // Remove from approved list
+
     await deleteDoc(doc(db, COL_APPROVED, docId));
+
     // Mark their request as revoked so they see the right screen on next visit
+
     await setDoc(doc(db, COL_REQUESTS, docId), {
+
       email, status: 'revoked', revokedAt: serverTimestamp(), revokedBy: auth.currentUser?.email || ''
+
     }, { merge: true });
+
     // Refresh the approved tab
+
     renderApprovedTab();
+
   } catch(e) {
+
     btn.disabled = false; btn.textContent = 'Revoke';
+
     alert('Error revoking: ' + e.message);
+
   }
+
 };
 
+
+
 // ── Auth state ──
+
 onAuthStateChanged(auth, async (user) => {
+
   if (!user) {
+
     if (reqUnsub) { reqUnsub(); reqUnsub = null; }
+
     reqPanel.style.display = 'none';
+
     showSignIn();
+
     return;
+
   }
+
+
 
   const email  = (user.email || '').toLowerCase();
+
   const domain = email.split('@')[1] || '';
 
+
+
   // Hard block for non-girnarsoft accounts
+
   if (domain !== ALLOWED_DOMAIN) {
+
     gate.style.display  = 'flex';
+
     dashboard.style.display = 'none';
+
     authIcon.textContent = '🔒';
+
     authTitle.textContent = 'Access Restricted';
+
     authDesc.innerHTML = 'This dashboard is only accessible to <strong>@girnarsoft.com</strong> accounts.';
+
     signinBtn.style.display = 'none';
+
     infoBox.innerHTML = `You signed in as <strong>${user.email}</strong>.<br>Only @girnarsoft.com accounts can request access.`;
+
     infoBox.style.display = 'block';
+
     errorEl.style.display = 'none';
+
     signoutBtn.style.display = 'block';
+
     return;
+
   }
+
+
 
   // Admins bypass all checks
+
   if (ADMINS.includes(email)) {
+
     gate.style.display  = 'none';
+
     dashboard.style.display = 'block';
+
     signoutBtn.style.display = 'block';
+
     reqPanel.style.display = 'block';
+
     reqTabsEl.style.display = 'flex';
+
     startAdminListener();
+
     initDashboard();
+
     return;
+
   }
+
+
 
   try {
+
     // Primary check: approved_emails collection
+
     const approvedSnap = await getDoc(doc(db, COL_APPROVED, email));
+
     if (approvedSnap.exists()) {
+
       gate.style.display  = 'none';
+
       dashboard.style.display = 'block';
+
       signoutBtn.style.display = 'block';
+
       initDashboard();
+
       return;
+
     }
+
+
 
     // Check existing request status
+
     const reqSnap = await getDoc(doc(db, COL_REQUESTS, email));
+
     if (reqSnap.exists()) {
+
       const status = reqSnap.data().status;
+
       // Fallback: request was approved but approved_emails write may have failed
+
       if (status === 'approved') {
+
         // Heal: write to approved_emails so future loads are fast
+
         try {
+
           await setDoc(doc(db, COL_APPROVED, email), {
+
             email: user.email, approvedAt: serverTimestamp(), approvedBy: 'auto-healed'
+
           });
+
         } catch(_) {}
+
         gate.style.display  = 'none';
+
         dashboard.style.display = 'block';
+
         signoutBtn.style.display = 'block';
+
         initDashboard();
+
         return;
+
       }
+
       if (status === 'rejected') { showDenied(user);  return; }
+
       if (status === 'revoked')  { showRevoked(user); return; }
+
       if (status === 'pending')  { showPending(user); return; }
+
     }
 
+
+
     // No record at all — submit fresh access request
+
     await setDoc(doc(db, COL_REQUESTS, email), {
+
       email: user.email,
+
       name: user.displayName || '',
+
       photoURL: user.photoURL || '',
+
       requestedAt: serverTimestamp(),
+
       status: 'pending'
+
     }, { merge: true });
+
     showPending(user);
 
+
+
   } catch(e) {
+
     gate.style.display  = 'flex';
+
     dashboard.style.display = 'none';
+
     authIcon.textContent = '⚠️';
+
     authTitle.textContent = 'Access check failed';
+
     authDesc.textContent = 'Could not verify your access. Please try signing out and back in.';
+
     errorEl.textContent = 'Error: ' + e.message;
+
     errorEl.style.display = 'block';
+
     signinBtn.style.display = 'none';
+
     signoutBtn.style.display = 'block';
+
     console.error('[Auth] Firestore check failed for', email, e);
+
   }
+
 });
+
 </script>
 
+
+
 <!-- ── DASHBOARD LOGIC ── -->
+
 <script>
-var BUILD_TS = '2026-08-10T08:20:30.987Z'; // replaced by Apps Script on each push
+
+var BUILD_TS = '2026-08-18T05:28:19.971Z'; // replaced by Apps Script on each push
+
+
 
 // Force reload if a newer version has been pushed (localStorage persists across sessions)
+
 (function(){
+
   var stored = localStorage.getItem('uc_build_ts');
+
   if (stored && stored !== BUILD_TS) {
+
     localStorage.setItem('uc_build_ts', BUILD_TS);
+
     location.reload(true);
+
     return;
+
   }
+
   localStorage.setItem('uc_build_ts', BUILD_TS);
+
 })();
 
+
+
 var DATA_RAW = [
-  {Campaign:"AHM-App-Download-28july", Spends:6626.31, Impressions:95798, Clicks:5106, Conversions:1430, Platform:"Google", City:"Ahmedabad", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
-  {Campaign:"AHM-Search-Buy-Used-Car-8april", Spends:194776.07, Impressions:389983, Clicks:75523, Conversions:7442.35, Platform:"Google", City:"Ahmedabad", Type:"Search", Triggered_Leads:3728, Dealer_Triggers:1844, Status:"Ongoing", StartDate:"2026-04-08", EndDate:null},
-  {Campaign:"AHM-UCR-Catalogue-Ads", Spends:154288.99, Impressions:4767861, Clicks:424725, Conversions:4611, Platform:"Meta", City:"Ahmedabad", Type:"Catalogue", Triggered_Leads:5435, Dealer_Triggers:3734, Status:"Ongoing", StartDate:"2026-04-20", EndDate:null},
-  {Campaign:"AHM-VIA-Catalogue-28July", Spends:23446.52, Impressions:440359, Clicks:28039, Conversions:325, Platform:"Meta", City:"Ahmedabad", Type:"Catalogue", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
-  {Campaign:"AHM-Whatsup-Leads-5aug", Spends:16644.48, Impressions:364367, Clicks:2878, Conversions:395, Platform:"Meta", City:"Ahmedabad", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Ongoing", StartDate:"2026-08-05", EndDate:null},
-  {Campaign:"Chandigarh-UCR-Catalogue-Ads", Spends:133887.58, Impressions:4221342, Clicks:297191, Conversions:2023, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:2305, Dealer_Triggers:1807, Status:"Ongoing", StartDate:"2026-04-22", EndDate:null},
+  {Campaign:"AHM_14TH_Aug_Consolidated", Spends:11022.04, Impressions:95171, Clicks:13032, Conversions:327, Platform:"Meta", City:"Ahmedabad", Type:"Catalogue", Triggered_Leads:477, Dealer_Triggers:439, Status:"Ongoing", StartDate:"2026-08-14", EndDate:null},
+  {Campaign:"AHM-App-Download-28july", Spends:10688.63, Impressions:156489, Clicks:8124, Conversions:2302, Platform:"Google", City:"Ahmedabad", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
+  {Campaign:"AHM-Search-Buy-Used-Car-8april", Spends:224687.6, Impressions:415949, Clicks:81715, Conversions:7780.28, Platform:"Google", City:"Ahmedabad", Type:"Search", Triggered_Leads:4022, Dealer_Triggers:2009, Status:"Ongoing", StartDate:"2026-04-08", EndDate:null},
+  {Campaign:"AHM-UCR-Catalogue-Ads", Spends:192463.95, Impressions:5634180, Clicks:474743, Conversions:4987, Platform:"Meta", City:"Ahmedabad", Type:"Catalogue", Triggered_Leads:5957, Dealer_Triggers:4204, Status:"Ongoing", StartDate:"2026-04-20", EndDate:null},
+  {Campaign:"AHM-VIA-Catalogue-28July", Spends:43799.64, Impressions:690560, Clicks:43259, Conversions:532, Platform:"Meta", City:"Ahmedabad", Type:"Catalogue", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
+  {Campaign:"AHM-Whatsup-Leads-5aug", Spends:30565.1, Impressions:695593, Clicks:5398, Conversions:707, Platform:"Meta", City:"Ahmedabad", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Paused", StartDate:"2026-08-05", EndDate:"2026-08-13"},
+  {Campaign:"Chandigarh-UCR-Catalogue-Ads", Spends:168301.77, Impressions:4902822, Clicks:340904, Conversions:2346, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:2735, Dealer_Triggers:2182, Status:"Ongoing", StartDate:"2026-04-22", EndDate:null},
   {Campaign:"Chandigarh-VIA-Catalogue-Ads-28July", Spends:78.27, Impressions:1283, Clicks:54, Conversions:0, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:0, Dealer_Triggers:0, Status:"Paused", StartDate:"2026-07-28", EndDate:"2026-07-28"},
-  {Campaign:"Chandigarh-Whatsup-Leads-4ug", Spends:16651.79, Impressions:248709, Clicks:2312, Conversions:354, Platform:"Meta", City:"Chandigarh", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Ongoing", StartDate:"2026-08-05", EndDate:null},
-  {Campaign:"CHD-App-Download-USD-28july", Spends:6729.54, Impressions:116535, Clicks:8621, Conversions:1260, Platform:"Google", City:"Chandigarh", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
-  {Campaign:"CHD-Buyer-Acquisition-6April", Spends:180223.8, Impressions:335842, Clicks:72470, Conversions:6178.71, Platform:"Google", City:"Chandigarh", Type:"Search", Triggered_Leads:2773, Dealer_Triggers:1232, Status:"Ongoing", StartDate:"2026-04-06", EndDate:null},
-  {Campaign:"CHD-VIA-Catalogue-28july", Spends:15467.64, Impressions:242719, Clicks:14431, Conversions:159, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:188, Dealer_Triggers:166, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
+  {Campaign:"Chandigarh-Whatsup-Leads-4ug", Spends:31895.36, Impressions:521742, Clicks:4494, Conversions:634, Platform:"Meta", City:"Chandigarh", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Paused", StartDate:"2026-08-05", EndDate:"2026-08-13"},
+  {Campaign:"CHD-17aug-Consolidated", Spends:1083.79, Impressions:8744, Clicks:767, Conversions:11, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-08-17", EndDate:null},
+  {Campaign:"CHD-App-Download-USD-28july", Spends:10673.34, Impressions:195543, Clicks:14521, Conversions:1999, Platform:"Google", City:"Chandigarh", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
+  {Campaign:"CHD-Buyer-Acquisition-6April", Spends:200598.16, Impressions:353195, Clicks:77021, Conversions:6452.27, Platform:"Google", City:"Chandigarh", Type:"Search", Triggered_Leads:3002, Dealer_Triggers:1351, Status:"Ongoing", StartDate:"2026-04-06", EndDate:null},
+  {Campaign:"CHD-VIA-Catalogue-28july", Spends:37061.57, Impressions:517059, Clicks:24389, Conversions:236, Platform:"Meta", City:"Chandigarh", Type:"Catalogue", Triggered_Leads:272, Dealer_Triggers:237, Status:"Ongoing", StartDate:"2026-07-28", EndDate:null},
   {Campaign:"Demand-Gen-CHD-1july-UC", Spends:1373.62, Impressions:5471, Clicks:88, Conversions:0, Platform:"Google", City:"Chandigarh", Type:"Demand Gen", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Paused", StartDate:"2026-07-01", EndDate:"2026-07-03"},
   {Campaign:"Demand-Gen-Nashik-1july-UC", Spends:37356.92, Impressions:378313, Clicks:5823, Conversions:115.06, Platform:"Google", City:"Nashik", Type:"Demand Gen", Triggered_Leads:75, Dealer_Triggers:56, Status:"Experiment · Paused", StartDate:"2026-07-01", EndDate:"2026-07-24"},
-  {Campaign:"Nashik-App-downlaod", Spends:19054.21, Impressions:176465, Clicks:18533, Conversions:2642, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-15", EndDate:null},
+  {Campaign:"Nashik-17aug-Consolidated", Spends:1060.49, Impressions:10945, Clicks:493, Conversions:9, Platform:"Meta", City:"Nashik", Type:"Catalogue", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-08-17", EndDate:null},
+  {Campaign:"Nashik-App-downlaod", Spends:23287.73, Impressions:207537, Clicks:24172, Conversions:3214, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-07-15", EndDate:null},
   {Campaign:"Nashik-DSA-UsedCars-Discovery", Spends:597.78, Impressions:874, Clicks:130, Conversions:0, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Paused", StartDate:"2026-06-10", EndDate:"2026-06-10"},
   {Campaign:"Nashik-pmax-Used-car-16june", Spends:16717.71, Impressions:52786, Clicks:5685, Conversions:575.93, Platform:"Google", City:"Nashik", Type:"Performance Max", Triggered_Leads:229, Dealer_Triggers:192, Status:"Experiment · Paused", StartDate:"2026-06-16", EndDate:"2026-07-24"},
-  {Campaign:"Nashik-UCR-Catalogue-Ads", Spends:292888.98, Impressions:6844331, Clicks:301109, Conversions:2685, Platform:"Meta", City:"Nashik", Type:"Catalogue", Triggered_Leads:3060, Dealer_Triggers:2688, Status:"Ongoing", StartDate:"2026-04-22", EndDate:null},
+  {Campaign:"Nashik-UCR-Catalogue-Ads", Spends:306171.17, Impressions:7058024, Clicks:313278, Conversions:2822, Platform:"Meta", City:"Nashik", Type:"Catalogue", Triggered_Leads:3189, Dealer_Triggers:2810, Status:"Ongoing", StartDate:"2026-04-22", EndDate:null},
   {Campaign:"Nashik-UCR-Static-Website", Spends:4156.98, Impressions:32359, Clicks:365, Conversions:12, Platform:"Meta", City:"Nashik", Type:"Website Conversion", Triggered_Leads:9, Dealer_Triggers:7, Status:"Experiment · Paused", StartDate:"2026-07-06", EndDate:"2026-07-10"},
-  {Campaign:"Nashik-VIA-21July-Catalogue", Spends:56063.44, Impressions:882935, Clicks:41063, Conversions:541, Platform:"Meta", City:"Nashik", Type:"Catalogue", Triggered_Leads:802, Dealer_Triggers:762, Status:"Ongoing", StartDate:"2026-07-21", EndDate:null},
+  {Campaign:"Nashik-VIA-21July-Catalogue", Spends:93023.21, Impressions:1461867, Clicks:65366, Conversions:884, Platform:"Meta", City:"Nashik", Type:"Catalogue", Triggered_Leads:1308, Dealer_Triggers:1236, Status:"Ongoing", StartDate:"2026-07-21", EndDate:null},
   {Campaign:"Nashik-Whatsup-Leads", Spends:509.13, Impressions:11113, Clicks:95, Conversions:7, Platform:"Meta", City:"Nashik", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Paused", StartDate:"2026-07-13", EndDate:"2026-07-13"},
-  {Campaign:"Nashik-Whatsup-Leads -13thJuly", Spends:131031.39, Impressions:3114457, Clicks:19438, Conversions:1996, Platform:"Meta", City:"Nashik", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Ongoing", StartDate:"2026-07-13", EndDate:null},
-  {Campaign:"Nasik-Search-Buy-UsedCar-8april", Spends:197393.31, Impressions:193996, Clicks:44773, Conversions:4404.83, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:1950, Dealer_Triggers:1440, Status:"Ongoing", StartDate:"2026-04-08", EndDate:null},
+  {Campaign:"Nashik-Whatsup-Leads -13thJuly", Spends:152905.52, Impressions:3516859, Clicks:22072, Conversions:2289, Platform:"Meta", City:"Nashik", Type:"WhatsApp", Triggered_Leads:0, Dealer_Triggers:0, Status:"Experiment · Paused", StartDate:"2026-07-13", EndDate:"2026-08-13"},
+  {Campaign:"Nasik-Search-Buy-UsedCar-8april", Spends:206675.39, Impressions:204408, Clicks:46941, Conversions:4529.89, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:2063, Dealer_Triggers:1522, Status:"Ongoing", StartDate:"2026-04-08", EndDate:null},
+  {Campaign:"Search-Nashik-17Aug", Spends:57.82, Impressions:171, Clicks:33, Conversions:0, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:0, Dealer_Triggers:0, Status:"Ongoing", StartDate:"2026-08-17", EndDate:null},
   {Campaign:"UC-DSA-Nashik-UsedCars", Spends:9151.82, Impressions:22016, Clicks:3510, Conversions:453.08, Platform:"Google", City:"Nashik", Type:"Search", Triggered_Leads:25, Dealer_Triggers:14, Status:"Paused", StartDate:"2026-06-13", EndDate:"2026-06-22"},
   {Campaign:"YT_UC_Nashik", Spends:5405.49, Impressions:19153, Clicks:236, Conversions:4, Platform:"Google", City:"Nashik", Type:"YouTube", Triggered_Leads:1, Dealer_Triggers:0, Status:"Paused", StartDate:"2026-07-14", EndDate:"2026-07-17"}
 ];
 
+
+
 // Daily spend rows — replaced by Apps Script; used by date filter to re-aggregate
+
 var DATA_DAILY = [
   {Date:"2026-04-06",Campaign:"CHD-Buyer-Acquisition-6April",Spends:876.13,Impressions:1393,Clicks:246,Conversions:6},
   {Date:"2026-04-07",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1522.15,Impressions:3252,Clicks:594,Conversions:25.7},
@@ -982,7 +1646,6 @@ var DATA_DAILY = [
   {Date:"2026-06-01",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:516.37,Impressions:25928,Clicks:1799,Conversions:22},
   {Date:"2026-06-01",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1359.4,Impressions:45610,Clicks:1742,Conversions:24},
   {Date:"2026-06-01",Campaign:"AHM-UCR-Catalogue-Ads",Spends:504.72,Impressions:20580,Clicks:1938,Conversions:19},
-  {Date:"2026-06-01",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:443.34,Impressions:2877,Clicks:43,Conversions:5},
   {Date:"2026-06-02",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1158.77,Impressions:2329,Clicks:477,Conversions:71.19},
   {Date:"2026-06-02",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1034.02,Impressions:2837,Clicks:525,Conversions:38.78},
   {Date:"2026-06-02",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1158.77,Impressions:2329,Clicks:477,Conversions:71.19},
@@ -993,7 +1656,6 @@ var DATA_DAILY = [
   {Date:"2026-06-02",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:521.47,Impressions:24804,Clicks:1775,Conversions:10},
   {Date:"2026-06-02",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1284.17,Impressions:40636,Clicks:1643,Conversions:16},
   {Date:"2026-06-02",Campaign:"AHM-UCR-Catalogue-Ads",Spends:500.73,Impressions:19578,Clicks:1872,Conversions:25},
-  {Date:"2026-06-02",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:561.93,Impressions:3806,Clicks:75,Conversions:15},
   {Date:"2026-06-03",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:576.04,Impressions:401,Clicks:66,Conversions:8.05},
   {Date:"2026-06-03",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1026.26,Impressions:2566,Clicks:450,Conversions:52.39},
   {Date:"2026-06-03",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1324.51,Impressions:2843,Clicks:526,Conversions:47.09},
@@ -1006,7 +1668,6 @@ var DATA_DAILY = [
   {Date:"2026-06-03",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:462.92,Impressions:20549,Clicks:1475,Conversions:14},
   {Date:"2026-06-03",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1267.75,Impressions:36668,Clicks:1477,Conversions:18},
   {Date:"2026-06-03",Campaign:"AHM-UCR-Catalogue-Ads",Spends:468.33,Impressions:18239,Clicks:1656,Conversions:21},
-  {Date:"2026-06-03",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:518.15,Impressions:3069,Clicks:50,Conversions:7},
   {Date:"2026-06-04",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:3125.43,Impressions:1345,Clicks:254,Conversions:36.65},
   {Date:"2026-06-04",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:895.72,Impressions:2571,Clicks:383,Conversions:40.56},
   {Date:"2026-06-04",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1059.71,Impressions:2087,Clicks:465,Conversions:27.84},
@@ -1019,7 +1680,6 @@ var DATA_DAILY = [
   {Date:"2026-06-04",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:509.16,Impressions:20377,Clicks:1465,Conversions:17},
   {Date:"2026-06-04",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1257.7,Impressions:36623,Clicks:1444,Conversions:11},
   {Date:"2026-06-04",Campaign:"AHM-UCR-Catalogue-Ads",Spends:505.85,Impressions:16622,Clicks:1543,Conversions:18},
-  {Date:"2026-06-04",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:513.37,Impressions:2993,Clicks:53,Conversions:9},
   {Date:"2026-06-05",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:2189.26,Impressions:1562,Clicks:335,Conversions:30.48},
   {Date:"2026-06-05",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:836.49,Impressions:2581,Clicks:369,Conversions:25.42},
   {Date:"2026-06-05",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1076.56,Impressions:2249,Clicks:432,Conversions:47.36},
@@ -1032,7 +1692,6 @@ var DATA_DAILY = [
   {Date:"2026-06-05",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:467.42,Impressions:18382,Clicks:1178,Conversions:11},
   {Date:"2026-06-05",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1276.5,Impressions:35676,Clicks:1284,Conversions:7},
   {Date:"2026-06-05",Campaign:"AHM-UCR-Catalogue-Ads",Spends:493.28,Impressions:16930,Clicks:1620,Conversions:24},
-  {Date:"2026-06-05",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:409.76,Impressions:2203,Clicks:38,Conversions:6},
   {Date:"2026-06-06",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1761.01,Impressions:1453,Clicks:395,Conversions:34.84},
   {Date:"2026-06-06",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1521.28,Impressions:2918,Clicks:474,Conversions:61.03},
   {Date:"2026-06-06",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1095.47,Impressions:2861,Clicks:463,Conversions:29.2},
@@ -1045,7 +1704,6 @@ var DATA_DAILY = [
   {Date:"2026-06-06",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:492.79,Impressions:20203,Clicks:1250,Conversions:9},
   {Date:"2026-06-06",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1318.78,Impressions:38838,Clicks:1566,Conversions:10},
   {Date:"2026-06-06",Campaign:"AHM-UCR-Catalogue-Ads",Spends:496.91,Impressions:16994,Clicks:1694,Conversions:24},
-  {Date:"2026-06-06",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:522,Impressions:2581,Clicks:44,Conversions:7},
   {Date:"2026-06-07",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1829.97,Impressions:1503,Clicks:438,Conversions:56.28},
   {Date:"2026-06-07",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1212.58,Impressions:2674,Clicks:475,Conversions:47.51},
   {Date:"2026-06-07",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1111.45,Impressions:2221,Clicks:498,Conversions:70.67},
@@ -1058,7 +1716,6 @@ var DATA_DAILY = [
   {Date:"2026-06-07",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:533.18,Impressions:22914,Clicks:1429,Conversions:7},
   {Date:"2026-06-07",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1448.25,Impressions:39539,Clicks:1582,Conversions:13},
   {Date:"2026-06-07",Campaign:"AHM-UCR-Catalogue-Ads",Spends:551.54,Impressions:18720,Clicks:1846,Conversions:29},
-  {Date:"2026-06-07",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:581.55,Impressions:3090,Clicks:57,Conversions:5},
   {Date:"2026-06-08",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:2359.3,Impressions:1891,Clicks:429,Conversions:47.26},
   {Date:"2026-06-08",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:981.26,Impressions:2119,Clicks:421,Conversions:27.13},
   {Date:"2026-06-08",Campaign:"CHD-Buyer-Acquisition-6April",Spends:863.95,Impressions:2386,Clicks:429,Conversions:47.64},
@@ -1071,7 +1728,6 @@ var DATA_DAILY = [
   {Date:"2026-06-08",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:512.85,Impressions:21732,Clicks:1255,Conversions:5},
   {Date:"2026-06-08",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2990.38,Impressions:80471,Clicks:2464,Conversions:17},
   {Date:"2026-06-08",Campaign:"AHM-UCR-Catalogue-Ads",Spends:492.98,Impressions:17809,Clicks:1524,Conversions:18},
-  {Date:"2026-06-08",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:531.07,Impressions:3384,Clicks:54,Conversions:8},
   {Date:"2026-06-09",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:2694.6,Impressions:2498,Clicks:502,Conversions:47.16},
   {Date:"2026-06-09",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1002.08,Impressions:2469,Clicks:408,Conversions:57.91},
   {Date:"2026-06-09",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1026.04,Impressions:2501,Clicks:467,Conversions:38.71},
@@ -1084,7 +1740,6 @@ var DATA_DAILY = [
   {Date:"2026-06-09",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:478.44,Impressions:18763,Clicks:1173,Conversions:8},
   {Date:"2026-06-09",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3838.27,Impressions:85960,Clicks:3103,Conversions:22},
   {Date:"2026-06-09",Campaign:"AHM-UCR-Catalogue-Ads",Spends:506.82,Impressions:17059,Clicks:1590,Conversions:21},
-  {Date:"2026-06-09",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:472.46,Impressions:2648,Clicks:33,Conversions:4},
   {Date:"2026-06-10",Campaign:"Nashik-DSA-UsedCars-Discovery",Spends:298.89,Impressions:437,Clicks:65,Conversions:0},
   {Date:"2026-06-10",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:2818.5,Impressions:1796,Clicks:411,Conversions:14.45},
   {Date:"2026-06-10",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:997.2,Impressions:2313,Clicks:424,Conversions:46.95},
@@ -1099,7 +1754,6 @@ var DATA_DAILY = [
   {Date:"2026-06-10",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:458.08,Impressions:18947,Clicks:1229,Conversions:13},
   {Date:"2026-06-10",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2587.6,Impressions:55296,Clicks:2044,Conversions:13},
   {Date:"2026-06-10",Campaign:"AHM-UCR-Catalogue-Ads",Spends:493.44,Impressions:17525,Clicks:1738,Conversions:21},
-  {Date:"2026-06-10",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:393.54,Impressions:1884,Clicks:48,Conversions:10},
   {Date:"2026-06-11",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1690.68,Impressions:1477,Clicks:322,Conversions:34.92},
   {Date:"2026-06-11",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:822.2,Impressions:2327,Clicks:358,Conversions:24.75},
   {Date:"2026-06-11",Campaign:"CHD-Buyer-Acquisition-6April",Spends:1007.25,Impressions:2249,Clicks:429,Conversions:51.33},
@@ -1112,7 +1766,6 @@ var DATA_DAILY = [
   {Date:"2026-06-11",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:506.99,Impressions:19242,Clicks:1256,Conversions:5},
   {Date:"2026-06-11",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3183.11,Impressions:75506,Clicks:2643,Conversions:29},
   {Date:"2026-06-11",Campaign:"AHM-UCR-Catalogue-Ads",Spends:506.52,Impressions:18043,Clicks:1816,Conversions:21},
-  {Date:"2026-06-11",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:582.27,Impressions:3076,Clicks:48,Conversions:6},
   {Date:"2026-06-12",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:911.1,Impressions:1379,Clicks:282,Conversions:47.83},
   {Date:"2026-06-12",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:669.78,Impressions:1974,Clicks:329,Conversions:16.06},
   {Date:"2026-06-12",Campaign:"CHD-Buyer-Acquisition-6April",Spends:820.13,Impressions:2111,Clicks:394,Conversions:27.75},
@@ -1125,7 +1778,6 @@ var DATA_DAILY = [
   {Date:"2026-06-12",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:461.99,Impressions:18103,Clicks:1119,Conversions:6},
   {Date:"2026-06-12",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3072.14,Impressions:72475,Clicks:2563,Conversions:15},
   {Date:"2026-06-12",Campaign:"AHM-UCR-Catalogue-Ads",Spends:456.13,Impressions:17353,Clicks:1669,Conversions:26},
-  {Date:"2026-06-12",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:564.28,Impressions:2950,Clicks:47,Conversions:5},
   {Date:"2026-06-13",Campaign:"UC-DSA-Nashik-UsedCars",Spends:524.37,Impressions:841,Clicks:170,Conversions:20},
   {Date:"2026-06-13",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:803.62,Impressions:1283,Clicks:266,Conversions:47.18},
   {Date:"2026-06-13",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1208.1,Impressions:2519,Clicks:426,Conversions:33.64},
@@ -1140,7 +1792,6 @@ var DATA_DAILY = [
   {Date:"2026-06-13",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:547.78,Impressions:19074,Clicks:1153,Conversions:13},
   {Date:"2026-06-13",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2452.72,Impressions:51538,Clicks:1935,Conversions:23},
   {Date:"2026-06-13",Campaign:"AHM-UCR-Catalogue-Ads",Spends:490.37,Impressions:16652,Clicks:1665,Conversions:19},
-  {Date:"2026-06-13",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:374.72,Impressions:2009,Clicks:47,Conversions:9},
   {Date:"2026-06-14",Campaign:"UC-DSA-Nashik-UsedCars",Spends:1197.73,Impressions:2175,Clicks:417,Conversions:23},
   {Date:"2026-06-14",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:656.27,Impressions:1318,Clicks:266,Conversions:44.54},
   {Date:"2026-06-14",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1582.98,Impressions:2733,Clicks:464,Conversions:33.86},
@@ -1155,7 +1806,6 @@ var DATA_DAILY = [
   {Date:"2026-06-14",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:493.55,Impressions:18063,Clicks:1057,Conversions:3},
   {Date:"2026-06-14",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3486.04,Impressions:73054,Clicks:2752,Conversions:24},
   {Date:"2026-06-14",Campaign:"AHM-UCR-Catalogue-Ads",Spends:536.59,Impressions:18292,Clicks:1780,Conversions:18},
-  {Date:"2026-06-14",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:605.88,Impressions:3212,Clicks:45,Conversions:7},
   {Date:"2026-06-15",Campaign:"UC-DSA-Nashik-UsedCars",Spends:778.85,Impressions:2022,Clicks:297,Conversions:33.59},
   {Date:"2026-06-15",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:679.73,Impressions:1118,Clicks:217,Conversions:27.07},
   {Date:"2026-06-15",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:931.83,Impressions:1693,Clicks:311,Conversions:26.8},
@@ -1170,7 +1820,6 @@ var DATA_DAILY = [
   {Date:"2026-06-15",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:451.55,Impressions:16333,Clicks:935,Conversions:3},
   {Date:"2026-06-15",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3276.72,Impressions:70404,Clicks:2479,Conversions:17},
   {Date:"2026-06-15",Campaign:"AHM-UCR-Catalogue-Ads",Spends:497.39,Impressions:17306,Clicks:1757,Conversions:12},
-  {Date:"2026-06-15",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:419.08,Impressions:2173,Clicks:43,Conversions:4},
   {Date:"2026-06-16",Campaign:"Nashik-pmax-Used-car-16june",Spends:79.21,Impressions:134,Clicks:29,Conversions:3.03},
   {Date:"2026-06-16",Campaign:"UC-DSA-Nashik-UsedCars",Spends:617.65,Impressions:1924,Clicks:271,Conversions:36.67},
   {Date:"2026-06-16",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:879.71,Impressions:1210,Clicks:240,Conversions:21.27},
@@ -1187,7 +1836,6 @@ var DATA_DAILY = [
   {Date:"2026-06-16",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:478.65,Impressions:16859,Clicks:1041,Conversions:9},
   {Date:"2026-06-16",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3221.28,Impressions:71700,Clicks:2325,Conversions:14},
   {Date:"2026-06-16",Campaign:"AHM-UCR-Catalogue-Ads",Spends:459.4,Impressions:15841,Clicks:1502,Conversions:20},
-  {Date:"2026-06-16",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:577.86,Impressions:2837,Clicks:54,Conversions:9},
   {Date:"2026-06-17",Campaign:"Nashik-pmax-Used-car-16june",Spends:337.24,Impressions:875,Clicks:105,Conversions:25.78},
   {Date:"2026-06-17",Campaign:"UC-DSA-Nashik-UsedCars",Spends:491.46,Impressions:1418,Clicks:199,Conversions:40.49},
   {Date:"2026-06-17",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:727.09,Impressions:881,Clicks:202,Conversions:18.33},
@@ -1204,7 +1852,6 @@ var DATA_DAILY = [
   {Date:"2026-06-17",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:528.88,Impressions:16739,Clicks:1017,Conversions:12},
   {Date:"2026-06-17",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3441.39,Impressions:72181,Clicks:2492,Conversions:24},
   {Date:"2026-06-17",Campaign:"AHM-UCR-Catalogue-Ads",Spends:481.55,Impressions:15480,Clicks:1570,Conversions:16},
-  {Date:"2026-06-17",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:495.93,Impressions:2392,Clicks:40,Conversions:6},
   {Date:"2026-06-18",Campaign:"Nashik-pmax-Used-car-16june",Spends:158.32,Impressions:911,Clicks:100,Conversions:6.61},
   {Date:"2026-06-18",Campaign:"UC-DSA-Nashik-UsedCars",Spends:201.09,Impressions:818,Clicks:112,Conversions:7.79},
   {Date:"2026-06-18",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:648.2,Impressions:896,Clicks:205,Conversions:34.92},
@@ -1221,7 +1868,6 @@ var DATA_DAILY = [
   {Date:"2026-06-18",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:578.59,Impressions:20633,Clicks:1143,Conversions:8},
   {Date:"2026-06-18",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3641.07,Impressions:81328,Clicks:2743,Conversions:20},
   {Date:"2026-06-18",Campaign:"AHM-UCR-Catalogue-Ads",Spends:527.33,Impressions:17951,Clicks:1714,Conversions:17},
-  {Date:"2026-06-18",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:502.27,Impressions:2242,Clicks:32,Conversions:4},
   {Date:"2026-06-19",Campaign:"Nashik-pmax-Used-car-16june",Spends:268.25,Impressions:858,Clicks:115,Conversions:7.54},
   {Date:"2026-06-19",Campaign:"UC-DSA-Nashik-UsedCars",Spends:171.75,Impressions:512,Clicks:77,Conversions:18},
   {Date:"2026-06-19",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1532.18,Impressions:1276,Clicks:283,Conversions:53.28},
@@ -1238,7 +1884,6 @@ var DATA_DAILY = [
   {Date:"2026-06-19",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:486.4,Impressions:15179,Clicks:950,Conversions:9},
   {Date:"2026-06-19",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3180.49,Impressions:69299,Clicks:2299,Conversions:23},
   {Date:"2026-06-19",Campaign:"AHM-UCR-Catalogue-Ads",Spends:484.39,Impressions:14563,Clicks:1471,Conversions:15},
-  {Date:"2026-06-19",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:456.55,Impressions:1838,Clicks:35,Conversions:8},
   {Date:"2026-06-20",Campaign:"Nashik-pmax-Used-car-16june",Spends:199.26,Impressions:720,Clicks:123,Conversions:7.04},
   {Date:"2026-06-20",Campaign:"UC-DSA-Nashik-UsedCars",Spends:156.12,Impressions:495,Clicks:67,Conversions:28},
   {Date:"2026-06-20",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1297.05,Impressions:1011,Clicks:282,Conversions:35.83},
@@ -1255,7 +1900,6 @@ var DATA_DAILY = [
   {Date:"2026-06-20",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:481.71,Impressions:17418,Clicks:1084,Conversions:7},
   {Date:"2026-06-20",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2204,Impressions:52697,Clicks:1641,Conversions:21},
   {Date:"2026-06-20",Campaign:"AHM-UCR-Catalogue-Ads",Spends:512.22,Impressions:16379,Clicks:1551,Conversions:17},
-  {Date:"2026-06-20",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:414.95,Impressions:1916,Clicks:31,Conversions:4},
   {Date:"2026-06-21",Campaign:"Nashik-pmax-Used-car-16june",Spends:200.09,Impressions:892,Clicks:116,Conversions:18.58},
   {Date:"2026-06-21",Campaign:"UC-DSA-Nashik-UsedCars",Spends:340.18,Impressions:552,Clicks:111,Conversions:11},
   {Date:"2026-06-21",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1169.33,Impressions:978,Clicks:252,Conversions:22.5},
@@ -1272,7 +1916,6 @@ var DATA_DAILY = [
   {Date:"2026-06-21",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:540.75,Impressions:18325,Clicks:1058,Conversions:11},
   {Date:"2026-06-21",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3552.22,Impressions:73240,Clicks:2450,Conversions:12},
   {Date:"2026-06-21",Campaign:"AHM-UCR-Catalogue-Ads",Spends:544.71,Impressions:16251,Clicks:1496,Conversions:19},
-  {Date:"2026-06-21",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:583.92,Impressions:2270,Clicks:43,Conversions:7},
   {Date:"2026-06-22",Campaign:"Nashik-pmax-Used-car-16june",Spends:412.2,Impressions:1334,Clicks:169,Conversions:25.01},
   {Date:"2026-06-22",Campaign:"UC-DSA-Nashik-UsedCars",Spends:96.71,Impressions:251,Clicks:34,Conversions:6},
   {Date:"2026-06-22",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:916.28,Impressions:863,Clicks:263,Conversions:10.2},
@@ -1289,7 +1932,6 @@ var DATA_DAILY = [
   {Date:"2026-06-22",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:550.81,Impressions:18775,Clicks:1122,Conversions:13},
   {Date:"2026-06-22",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3945.97,Impressions:90891,Clicks:2790,Conversions:21},
   {Date:"2026-06-22",Campaign:"AHM-UCR-Catalogue-Ads",Spends:536.23,Impressions:16952,Clicks:1520,Conversions:19},
-  {Date:"2026-06-22",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:519.77,Impressions:2591,Clicks:46,Conversions:7},
   {Date:"2026-06-23",Campaign:"Nashik-pmax-Used-car-16june",Spends:702.2,Impressions:1830,Clicks:218,Conversions:14.78},
   {Date:"2026-06-23",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:701.85,Impressions:590,Clicks:227,Conversions:20.95},
   {Date:"2026-06-23",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:918.89,Impressions:1902,Clicks:516,Conversions:80.49},
@@ -1304,7 +1946,6 @@ var DATA_DAILY = [
   {Date:"2026-06-23",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:573,Impressions:18327,Clicks:1171,Conversions:8},
   {Date:"2026-06-23",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3915.06,Impressions:80440,Clicks:2512,Conversions:16},
   {Date:"2026-06-23",Campaign:"AHM-UCR-Catalogue-Ads",Spends:571.57,Impressions:17051,Clicks:1557,Conversions:32},
-  {Date:"2026-06-23",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:533.27,Impressions:2576,Clicks:66,Conversions:14},
   {Date:"2026-06-24",Campaign:"Nashik-pmax-Used-car-16june",Spends:657.09,Impressions:2198,Clicks:202,Conversions:20.51},
   {Date:"2026-06-24",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:700.79,Impressions:659,Clicks:227,Conversions:40.47},
   {Date:"2026-06-24",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:911.98,Impressions:2021,Clicks:492,Conversions:69.73},
@@ -1319,7 +1960,6 @@ var DATA_DAILY = [
   {Date:"2026-06-24",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:686.03,Impressions:20882,Clicks:1257,Conversions:14},
   {Date:"2026-06-24",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3673.46,Impressions:77655,Clicks:2280,Conversions:16},
   {Date:"2026-06-24",Campaign:"AHM-UCR-Catalogue-Ads",Spends:694.2,Impressions:18425,Clicks:1689,Conversions:28},
-  {Date:"2026-06-24",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:463.98,Impressions:2063,Clicks:32,Conversions:3},
   {Date:"2026-06-25",Campaign:"Nashik-pmax-Used-car-16june",Spends:639.07,Impressions:1872,Clicks:196,Conversions:24.19},
   {Date:"2026-06-25",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:755.97,Impressions:908,Clicks:225,Conversions:21.92},
   {Date:"2026-06-25",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1166.57,Impressions:2710,Clicks:519,Conversions:43.3},
@@ -1334,7 +1974,6 @@ var DATA_DAILY = [
   {Date:"2026-06-25",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:762.06,Impressions:17292,Clicks:938,Conversions:14},
   {Date:"2026-06-25",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1848.93,Impressions:36689,Clicks:1258,Conversions:12},
   {Date:"2026-06-25",Campaign:"AHM-UCR-Catalogue-Ads",Spends:958.69,Impressions:26075,Clicks:2241,Conversions:33},
-  {Date:"2026-06-25",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:402.66,Impressions:2120,Clicks:45,Conversions:8},
   {Date:"2026-06-26",Campaign:"Nashik-pmax-Used-car-16june",Spends:737.82,Impressions:2185,Clicks:209,Conversions:9.63},
   {Date:"2026-06-26",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1335.32,Impressions:1099,Clicks:266,Conversions:26.39},
   {Date:"2026-06-26",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1622.87,Impressions:2762,Clicks:572,Conversions:58.38},
@@ -1349,7 +1988,6 @@ var DATA_DAILY = [
   {Date:"2026-06-26",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:1446.51,Impressions:25815,Clicks:1274,Conversions:9},
   {Date:"2026-06-26",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1024.46,Impressions:9245,Clicks:134,Conversions:3},
   {Date:"2026-06-26",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1161.17,Impressions:31630,Clicks:2693,Conversions:36},
-  {Date:"2026-06-26",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:533.64,Impressions:2579,Clicks:36,Conversions:3},
   {Date:"2026-06-27",Campaign:"Nashik-pmax-Used-car-16june",Spends:829.17,Impressions:2410,Clicks:246,Conversions:28.44},
   {Date:"2026-06-27",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1315.82,Impressions:1040,Clicks:219,Conversions:16.13},
   {Date:"2026-06-27",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1696.19,Impressions:2555,Clicks:670,Conversions:49.99},
@@ -1364,7 +2002,6 @@ var DATA_DAILY = [
   {Date:"2026-06-27",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:735.13,Impressions:13400,Clicks:586,Conversions:6},
   {Date:"2026-06-27",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1219.55,Impressions:11566,Clicks:232,Conversions:0},
   {Date:"2026-06-27",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1135.23,Impressions:29622,Clicks:2713,Conversions:45},
-  {Date:"2026-06-27",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:461.14,Impressions:2618,Clicks:49,Conversions:8},
   {Date:"2026-06-28",Campaign:"Nashik-pmax-Used-car-16june",Spends:734.73,Impressions:1994,Clicks:228,Conversions:45.76},
   {Date:"2026-06-28",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1259.5,Impressions:1091,Clicks:315,Conversions:26.02},
   {Date:"2026-06-28",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1751.21,Impressions:3581,Clicks:788,Conversions:93.79},
@@ -1379,7 +2016,6 @@ var DATA_DAILY = [
   {Date:"2026-06-28",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:410.95,Impressions:3399,Clicks:33,Conversions:0},
   {Date:"2026-06-28",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1962.09,Impressions:42835,Clicks:1639,Conversions:21},
   {Date:"2026-06-28",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1249.8,Impressions:36380,Clicks:3136,Conversions:43},
-  {Date:"2026-06-28",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:605.81,Impressions:2861,Clicks:53,Conversions:8},
   {Date:"2026-06-29",Campaign:"Nashik-pmax-Used-car-16june",Spends:662.56,Impressions:1959,Clicks:226,Conversions:13.29},
   {Date:"2026-06-29",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:984.48,Impressions:736,Clicks:246,Conversions:23.66},
   {Date:"2026-06-29",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1516.05,Impressions:2362,Clicks:684,Conversions:56.25},
@@ -1394,7 +2030,6 @@ var DATA_DAILY = [
   {Date:"2026-06-29",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:1500.99,Impressions:21916,Clicks:748,Conversions:4},
   {Date:"2026-06-29",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1175.19,Impressions:26560,Clicks:991,Conversions:7},
   {Date:"2026-06-29",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1198.82,Impressions:34168,Clicks:2843,Conversions:31},
-  {Date:"2026-06-29",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:456.84,Impressions:2474,Clicks:56,Conversions:14},
   {Date:"2026-06-30",Campaign:"Nashik-pmax-Used-car-16june",Spends:595.87,Impressions:2205,Clicks:196,Conversions:15.73},
   {Date:"2026-06-30",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:948.7,Impressions:815,Clicks:229,Conversions:24.07},
   {Date:"2026-06-30",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1514.9,Impressions:2557,Clicks:689,Conversions:52.66},
@@ -1409,7 +2044,6 @@ var DATA_DAILY = [
   {Date:"2026-06-30",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:962.13,Impressions:15352,Clicks:479,Conversions:1},
   {Date:"2026-06-30",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1088.16,Impressions:28211,Clicks:1012,Conversions:7},
   {Date:"2026-06-30",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1240.04,Impressions:38208,Clicks:3338,Conversions:40},
-  {Date:"2026-06-30",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:492.37,Impressions:2474,Clicks:36,Conversions:3},
   {Date:"2026-07-01",Campaign:"Demand-Gen-CHD-1july-UC",Spends:136.96,Impressions:2632,Clicks:26,Conversions:0},
   {Date:"2026-07-01",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:447.25,Impressions:6807,Clicks:115,Conversions:0},
   {Date:"2026-07-01",Campaign:"Nashik-pmax-Used-car-16june",Spends:743.55,Impressions:2092,Clicks:164,Conversions:8.3},
@@ -1520,7 +2154,6 @@ var DATA_DAILY = [
   {Date:"2026-07-14",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:941.11,Impressions:34305,Clicks:1841,Conversions:9},
   {Date:"2026-07-14",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1804.81,Impressions:41998,Clicks:1750,Conversions:28},
   {Date:"2026-07-14",Campaign:"AHM-UCR-Catalogue-Ads",Spends:2012.4,Impressions:55812,Clicks:3811,Conversions:45},
-  {Date:"2026-07-14",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:468.11,Impressions:2103,Clicks:48,Conversions:7},
   {Date:"2026-07-15",Campaign:"Nashik-App-downlaod",Spends:217.37,Impressions:1665,Clicks:166,Conversions:29},
   {Date:"2026-07-15",Campaign:"YT_UC_Nashik",Spends:1120.3,Impressions:6247,Clicks:87,Conversions:1},
   {Date:"2026-07-15",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:431.62,Impressions:6656,Clicks:73,Conversions:5},
@@ -1540,7 +2173,6 @@ var DATA_DAILY = [
   {Date:"2026-07-16",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:1029.87,Impressions:29197,Clicks:2144,Conversions:17},
   {Date:"2026-07-16",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:5285.46,Impressions:103310,Clicks:4918,Conversions:48},
   {Date:"2026-07-16",Campaign:"AHM-UCR-Catalogue-Ads",Spends:2138.78,Impressions:59044,Clicks:4268,Conversions:44},
-  {Date:"2026-07-16",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:521.06,Impressions:2500,Clicks:53,Conversions:10},
   {Date:"2026-07-17",Campaign:"YT_UC_Nashik",Spends:1033.09,Impressions:2490,Clicks:21,Conversions:1},
   {Date:"2026-07-17",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:2619.71,Impressions:35599,Clicks:551,Conversions:25.31},
   {Date:"2026-07-17",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:2669.59,Impressions:1498,Clicks:368,Conversions:27.55},
@@ -1550,7 +2182,6 @@ var DATA_DAILY = [
   {Date:"2026-07-17",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:1269.79,Impressions:32955,Clicks:2997,Conversions:35},
   {Date:"2026-07-17",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:5952.94,Impressions:107648,Clicks:6444,Conversions:63},
   {Date:"2026-07-17",Campaign:"AHM-UCR-Catalogue-Ads",Spends:2278.63,Impressions:59572,Clicks:5198,Conversions:51},
-  {Date:"2026-07-17",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:532.42,Impressions:2389,Clicks:43,Conversions:9},
   {Date:"2026-07-18",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:3542.18,Impressions:43978,Clicks:599,Conversions:5.26},
   {Date:"2026-07-18",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1331.24,Impressions:956,Clicks:331,Conversions:27},
   {Date:"2026-07-18",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1816.67,Impressions:2679,Clicks:641,Conversions:50.17},
@@ -1559,7 +2190,6 @@ var DATA_DAILY = [
   {Date:"2026-07-18",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:752.01,Impressions:27029,Clicks:3032,Conversions:23},
   {Date:"2026-07-18",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3419.59,Impressions:68364,Clicks:6487,Conversions:45},
   {Date:"2026-07-18",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1560.78,Impressions:45842,Clicks:4879,Conversions:32},
-  {Date:"2026-07-18",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:438.83,Impressions:1991,Clicks:35,Conversions:4},
   {Date:"2026-07-19",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:3019.9,Impressions:46005,Clicks:669,Conversions:10.76},
   {Date:"2026-07-19",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1133.49,Impressions:622,Clicks:177,Conversions:4},
   {Date:"2026-07-19",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:1569.66,Impressions:2903,Clicks:692,Conversions:73},
@@ -1568,7 +2198,6 @@ var DATA_DAILY = [
   {Date:"2026-07-19",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:961.31,Impressions:37480,Clicks:4103,Conversions:33},
   {Date:"2026-07-19",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:4053.49,Impressions:96085,Clicks:7187,Conversions:56},
   {Date:"2026-07-19",Campaign:"AHM-UCR-Catalogue-Ads",Spends:1936.9,Impressions:57513,Clicks:5962,Conversions:48},
-  {Date:"2026-07-19",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:394.67,Impressions:1649,Clicks:25,Conversions:2},
   {Date:"2026-07-20",Campaign:"Nashik-App-downlaod",Spends:1165.02,Impressions:9932,Clicks:923,Conversions:166},
   {Date:"2026-07-20",Campaign:"Demand-Gen-Nashik-1july-UC",Spends:3207.66,Impressions:35077,Clicks:576,Conversions:16.45},
   {Date:"2026-07-20",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1241.48,Impressions:964,Clicks:286,Conversions:8},
@@ -1800,7 +2429,6 @@ var DATA_DAILY = [
   {Date:"2026-08-07",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:5663.81,Impressions:108123,Clicks:7779,Conversions:54},
   {Date:"2026-08-07",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2922.31,Impressions:44447,Clicks:2887,Conversions:36},
   {Date:"2026-08-07",Campaign:"AHM-UCR-Catalogue-Ads",Spends:6557.84,Impressions:140359,Clicks:11721,Conversions:68},
-  {Date:"2026-08-07",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:534.01,Impressions:2267,Clicks:58,Conversions:7},
   {Date:"2026-08-08",Campaign:"AHM-App-Download-28july",Spends:492.89,Impressions:6548,Clicks:357,Conversions:90},
   {Date:"2026-08-08",Campaign:"CHD-App-Download-USD-28july",Spends:478.9,Impressions:10139,Clicks:660,Conversions:87},
   {Date:"2026-08-08",Campaign:"Nashik-App-downlaod",Spends:529.38,Impressions:4262,Clicks:512,Conversions:69},
@@ -1816,7 +2444,6 @@ var DATA_DAILY = [
   {Date:"2026-08-08",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4829.83,Impressions:107027,Clicks:6717,Conversions:45},
   {Date:"2026-08-08",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2807.67,Impressions:42571,Clicks:2571,Conversions:20},
   {Date:"2026-08-08",Campaign:"AHM-UCR-Catalogue-Ads",Spends:4814.7,Impressions:109016,Clicks:8904,Conversions:52},
-  {Date:"2026-08-08",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:517.04,Impressions:2461,Clicks:27,Conversions:2},
   {Date:"2026-08-09",Campaign:"AHM-App-Download-28july",Spends:522.74,Impressions:7442,Clicks:373,Conversions:122},
   {Date:"2026-08-09",Campaign:"CHD-App-Download-USD-28july",Spends:480.62,Impressions:8351,Clicks:578,Conversions:88},
   {Date:"2026-08-09",Campaign:"Nashik-App-downlaod",Spends:531.65,Impressions:4937,Clicks:564,Conversions:64},
@@ -1832,10 +2459,124 @@ var DATA_DAILY = [
   {Date:"2026-08-09",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:5024.6,Impressions:112212,Clicks:7070,Conversions:48},
   {Date:"2026-08-09",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3532.09,Impressions:56332,Clicks:3022,Conversions:24},
   {Date:"2026-08-09",Campaign:"AHM-UCR-Catalogue-Ads",Spends:5148.09,Impressions:130663,Clicks:8694,Conversions:65},
-  {Date:"2026-08-09",Campaign:"UCR-Lead-Luxury-Cart-Classified-Jan25",Spends:574.57,Impressions:2177,Clicks:47,Conversions:6}
+  {Date:"2026-08-10",Campaign:"AHM-App-Download-28july",Spends:510.32,Impressions:6139,Clicks:347,Conversions:115},
+  {Date:"2026-08-10",Campaign:"CHD-App-Download-USD-28july",Spends:480.17,Impressions:7738,Clicks:540,Conversions:102},
+  {Date:"2026-08-10",Campaign:"Nashik-App-downlaod",Spends:534.82,Impressions:4106,Clicks:518,Conversions:81},
+  {Date:"2026-08-10",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1931.55,Impressions:2470,Clicks:441,Conversions:21.26},
+  {Date:"2026-08-10",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3870.24,Impressions:3500,Clicks:852,Conversions:37.86},
+  {Date:"2026-08-10",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2655.84,Impressions:2328,Clicks:550,Conversions:36.39},
+  {Date:"2026-08-10",Campaign:"AHM-UCR-Catalogue-Ads",Spends:5089.96,Impressions:124258,Clicks:9164,Conversions:62},
+  {Date:"2026-08-10",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3181.57,Impressions:49898,Clicks:3265,Conversions:36},
+  {Date:"2026-08-10",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4120.96,Impressions:91767,Clicks:6249,Conversions:44},
+  {Date:"2026-08-10",Campaign:"Nashik-Whatsup-Leads -13thJuly",Spends:7039.59,Impressions:121355,Clicks:831,Conversions:99},
+  {Date:"2026-08-10",Campaign:"Nashik-VIA-21July-Catalogue",Spends:2112.1,Impressions:38073,Clicks:1588,Conversions:28},
+  {Date:"2026-08-10",Campaign:"AHM-VIA-Catalogue-28July",Spends:1651.68,Impressions:25742,Clicks:2007,Conversions:14},
+  {Date:"2026-08-10",Campaign:"CHD-VIA-Catalogue-28july",Spends:2878.5,Impressions:62377,Clicks:2787,Conversions:20},
+  {Date:"2026-08-10",Campaign:"Chandigarh-Whatsup-Leads-4ug",Spends:4335.74,Impressions:71856,Clicks:638,Conversions:83},
+  {Date:"2026-08-10",Campaign:"AHM-Whatsup-Leads-5aug",Spends:4266.28,Impressions:97292,Clicks:785,Conversions:85},
+  {Date:"2026-08-11",Campaign:"AHM-App-Download-28july",Spends:505.3,Impressions:5924,Clicks:290,Conversions:103},
+  {Date:"2026-08-11",Campaign:"CHD-App-Download-USD-28july",Spends:480.38,Impressions:10527,Clicks:873,Conversions:94},
+  {Date:"2026-08-11",Campaign:"Nashik-App-downlaod",Spends:516.95,Impressions:3535,Clicks:522,Conversions:62},
+  {Date:"2026-08-11",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1052.15,Impressions:1267,Clicks:249,Conversions:14.35},
+  {Date:"2026-08-11",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3941.32,Impressions:2986,Clicks:760,Conversions:40.2},
+  {Date:"2026-08-11",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2590.32,Impressions:1891,Clicks:551,Conversions:28.62},
+  {Date:"2026-08-11",Campaign:"AHM-UCR-Catalogue-Ads",Spends:5114.84,Impressions:129925,Clicks:9198,Conversions:69},
+  {Date:"2026-08-11",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2705.34,Impressions:46865,Clicks:2706,Conversions:24},
+  {Date:"2026-08-11",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4998.34,Impressions:93445,Clicks:5742,Conversions:39},
+  {Date:"2026-08-11",Campaign:"Nashik-Whatsup-Leads -13thJuly",Spends:6071.69,Impressions:112224,Clicks:752,Conversions:80},
+  {Date:"2026-08-11",Campaign:"Nashik-VIA-21July-Catalogue",Spends:1758.3,Impressions:33115,Clicks:1323,Conversions:36},
+  {Date:"2026-08-11",Campaign:"AHM-VIA-Catalogue-28July",Spends:3780.21,Impressions:50606,Clicks:2123,Conversions:31},
+  {Date:"2026-08-11",Campaign:"CHD-VIA-Catalogue-28july",Spends:2632.54,Impressions:58059,Clicks:2573,Conversions:26},
+  {Date:"2026-08-11",Campaign:"Chandigarh-Whatsup-Leads-4ug",Spends:3609.17,Impressions:63129,Clicks:466,Conversions:53},
+  {Date:"2026-08-11",Campaign:"AHM-Whatsup-Leads-5aug",Spends:3863.33,Impressions:90654,Clicks:697,Conversions:90},
+  {Date:"2026-08-12",Campaign:"AHM-App-Download-28july",Spends:538.01,Impressions:7364,Clicks:290,Conversions:110},
+  {Date:"2026-08-12",Campaign:"CHD-App-Download-USD-28july",Spends:497.08,Impressions:8012,Clicks:666,Conversions:92},
+  {Date:"2026-08-12",Campaign:"Nashik-App-downlaod",Spends:543.39,Impressions:3536,Clicks:591,Conversions:75},
+  {Date:"2026-08-12",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:754.47,Impressions:840,Clicks:181,Conversions:8.47},
+  {Date:"2026-08-12",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3847.28,Impressions:3309,Clicks:782,Conversions:40.61},
+  {Date:"2026-08-12",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2574.06,Impressions:1900,Clicks:549,Conversions:37.5},
+  {Date:"2026-08-12",Campaign:"AHM-UCR-Catalogue-Ads",Spends:2958.01,Impressions:72754,Clicks:4971,Conversions:40},
+  {Date:"2026-08-12",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:2595.1,Impressions:43277,Clicks:2194,Conversions:36},
+  {Date:"2026-08-12",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:3831.35,Impressions:80836,Clicks:5021,Conversions:42},
+  {Date:"2026-08-12",Campaign:"Nashik-Whatsup-Leads -13thJuly",Spends:5605.85,Impressions:113691,Clicks:745,Conversions:73},
+  {Date:"2026-08-12",Campaign:"Nashik-VIA-21July-Catalogue",Spends:1993.65,Impressions:29652,Clicks:1242,Conversions:25},
+  {Date:"2026-08-12",Campaign:"AHM-VIA-Catalogue-28July",Spends:2246.95,Impressions:26766,Clicks:1941,Conversions:38},
+  {Date:"2026-08-12",Campaign:"CHD-VIA-Catalogue-28july",Spends:1804.43,Impressions:38290,Clicks:1555,Conversions:6},
+  {Date:"2026-08-12",Campaign:"Chandigarh-Whatsup-Leads-4ug",Spends:3848.48,Impressions:67309,Clicks:564,Conversions:79},
+  {Date:"2026-08-12",Campaign:"AHM-Whatsup-Leads-5aug",Spends:3610.17,Impressions:86133,Clicks:639,Conversions:90},
+  {Date:"2026-08-13",Campaign:"AHM-App-Download-28july",Spends:501.29,Impressions:7191,Clicks:305,Conversions:90},
+  {Date:"2026-08-13",Campaign:"CHD-App-Download-USD-28july",Spends:479.27,Impressions:9756,Clicks:688,Conversions:82},
+  {Date:"2026-08-13",Campaign:"Nashik-App-downlaod",Spends:520.19,Impressions:4049,Clicks:551,Conversions:69},
+  {Date:"2026-08-13",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1043.09,Impressions:1032,Clicks:234,Conversions:22.15},
+  {Date:"2026-08-13",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3860.67,Impressions:3243,Clicks:808,Conversions:59.96},
+  {Date:"2026-08-13",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2577.91,Impressions:2181,Clicks:580,Conversions:32.12},
+  {Date:"2026-08-13",Campaign:"AHM-UCR-Catalogue-Ads",Spends:3441.31,Impressions:66229,Clicks:3268,Conversions:17},
+  {Date:"2026-08-13",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:3181.43,Impressions:50176,Clicks:2659,Conversions:24},
+  {Date:"2026-08-13",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4669.59,Impressions:87047,Clicks:5620,Conversions:41},
+  {Date:"2026-08-13",Campaign:"Nashik-Whatsup-Leads -13thJuly",Spends:3157,Impressions:55132,Clicks:306,Conversions:41},
+  {Date:"2026-08-13",Campaign:"Nashik-VIA-21July-Catalogue",Spends:3111.26,Impressions:45230,Clicks:2226,Conversions:47},
+  {Date:"2026-08-13",Campaign:"AHM-VIA-Catalogue-28July",Spends:2289.93,Impressions:28571,Clicks:1853,Conversions:24},
+  {Date:"2026-08-13",Campaign:"CHD-VIA-Catalogue-28july",Spends:670.38,Impressions:6266,Clicks:288,Conversions:1},
+  {Date:"2026-08-13",Campaign:"Chandigarh-Whatsup-Leads-4ug",Spends:3450.18,Impressions:70739,Clicks:514,Conversions:65},
+  {Date:"2026-08-13",Campaign:"AHM-Whatsup-Leads-5aug",Spends:2180.84,Impressions:57147,Clicks:399,Conversions:47},
+  {Date:"2026-08-14",Campaign:"AHM-App-Download-28july",Spends:486.34,Impressions:8045,Clicks:415,Conversions:98},
+  {Date:"2026-08-14",Campaign:"CHD-App-Download-USD-28july",Spends:506.41,Impressions:9823,Clicks:786,Conversions:87},
+  {Date:"2026-08-14",Campaign:"Nashik-App-downlaod",Spends:515.94,Impressions:3535,Clicks:689,Conversions:69},
+  {Date:"2026-08-14",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1070.95,Impressions:1026,Clicks:237,Conversions:14.73},
+  {Date:"2026-08-14",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3831.07,Impressions:3125,Clicks:742,Conversions:41.41},
+  {Date:"2026-08-14",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2558.66,Impressions:2371,Clicks:554,Conversions:35.84},
+  {Date:"2026-08-14",Campaign:"AHM_14TH_Aug_Consolidated",Spends:1748.38,Impressions:13012,Clicks:2000,Conversions:53},
+  {Date:"2026-08-14",Campaign:"CHD-VIA-Catalogue-28july",Spends:3446.64,Impressions:26438,Clicks:766,Conversions:9},
+  {Date:"2026-08-14",Campaign:"AHM-VIA-Catalogue-28July",Spends:3437.77,Impressions:29947,Clicks:1966,Conversions:21},
+  {Date:"2026-08-14",Campaign:"Nashik-VIA-21July-Catalogue",Spends:6131.05,Impressions:85418,Clicks:3923,Conversions:37},
+  {Date:"2026-08-14",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4601.67,Impressions:73058,Clicks:4867,Conversions:35},
+  {Date:"2026-08-14",Campaign:"Nashik-UCR-Catalogue-Ads",Spends:1618.75,Impressions:23477,Clicks:1345,Conversions:17},
+  {Date:"2026-08-14",Campaign:"AHM-UCR-Catalogue-Ads",Spends:7600.51,Impressions:146031,Clicks:7556,Conversions:56},
+  {Date:"2026-08-15",Campaign:"AHM-App-Download-28july",Spends:507.25,Impressions:12214,Clicks:643,Conversions:127},
+  {Date:"2026-08-15",Campaign:"CHD-App-Download-USD-28july",Spends:494.65,Impressions:10108,Clicks:783,Conversions:105},
+  {Date:"2026-08-15",Campaign:"Nashik-App-downlaod",Spends:513.94,Impressions:4433,Clicks:1150,Conversions:68},
+  {Date:"2026-08-15",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1011.89,Impressions:1187,Clicks:239,Conversions:13.25},
+  {Date:"2026-08-15",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3601.08,Impressions:3224,Clicks:715,Conversions:41.14},
+  {Date:"2026-08-15",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2440.02,Impressions:2246,Clicks:563,Conversions:35.44},
+  {Date:"2026-08-15",Campaign:"AHM_14TH_Aug_Consolidated",Spends:2160.69,Impressions:16149,Clicks:2717,Conversions:69},
+  {Date:"2026-08-15",Campaign:"CHD-VIA-Catalogue-28july",Spends:4995.28,Impressions:38848,Clicks:981,Conversions:7},
+  {Date:"2026-08-15",Campaign:"AHM-VIA-Catalogue-28July",Spends:2116.47,Impressions:23262,Clicks:1598,Conversions:31},
+  {Date:"2026-08-15",Campaign:"Nashik-VIA-21July-Catalogue",Spends:7020.03,Impressions:100447,Clicks:4584,Conversions:53},
+  {Date:"2026-08-15",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:3990.06,Impressions:82989,Clicks:5161,Conversions:41},
+  {Date:"2026-08-15",Campaign:"AHM-UCR-Catalogue-Ads",Spends:6109.55,Impressions:143790,Clicks:6101,Conversions:52},
+  {Date:"2026-08-16",Campaign:"AHM-App-Download-28july",Spends:511.7,Impressions:7001,Clicks:368,Conversions:112},
+  {Date:"2026-08-16",Campaign:"CHD-App-Download-USD-28july",Spends:512.88,Impressions:11938,Clicks:824,Conversions:94},
+  {Date:"2026-08-16",Campaign:"Nashik-App-downlaod",Spends:534.25,Impressions:4101,Clicks:826,Conversions:73},
+  {Date:"2026-08-16",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1367.73,Impressions:1518,Clicks:326,Conversions:18.89},
+  {Date:"2026-08-16",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3701.74,Impressions:3453,Clicks:820,Conversions:36.42},
+  {Date:"2026-08-16",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2464.75,Impressions:2285,Clicks:623,Conversions:37.06},
+  {Date:"2026-08-16",Campaign:"AHM_14TH_Aug_Consolidated",Spends:3276.33,Impressions:29436,Clicks:4115,Conversions:103},
+  {Date:"2026-08-16",Campaign:"CHD-VIA-Catalogue-28july",Spends:3240.66,Impressions:27746,Clicks:660,Conversions:6},
+  {Date:"2026-08-16",Campaign:"AHM-VIA-Catalogue-28July",Spends:3481.33,Impressions:49567,Clicks:2790,Conversions:33},
+  {Date:"2026-08-16",Campaign:"Nashik-VIA-21July-Catalogue",Spends:9215.45,Impressions:156601,Clicks:5995,Conversions:63},
+  {Date:"2026-08-16",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:4931.39,Impressions:104384,Clicks:6752,Conversions:49},
+  {Date:"2026-08-16",Campaign:"AHM-UCR-Catalogue-Ads",Spends:5511.29,Impressions:130086,Clicks:7044,Conversions:61},
+  {Date:"2026-08-17",Campaign:"Search-Nashik-17Aug",Spends:57.82,Impressions:171,Clicks:33,Conversions:0},
+  {Date:"2026-08-17",Campaign:"AHM-App-Download-28july",Spends:502.11,Impressions:6813,Clicks:360,Conversions:117},
+  {Date:"2026-08-17",Campaign:"CHD-App-Download-USD-28july",Spends:492.96,Impressions:11106,Clicks:740,Conversions:83},
+  {Date:"2026-08-17",Campaign:"Nashik-App-downlaod",Spends:554.04,Impressions:3777,Clicks:792,Conversions:75},
+  {Date:"2026-08-17",Campaign:"Nasik-Search-Buy-UsedCar-8april",Spends:1050.25,Impressions:1072,Clicks:261,Conversions:11.96},
+  {Date:"2026-08-17",Campaign:"AHM-Search-Buy-Used-Car-8april",Spends:3258.13,Impressions:3126,Clicks:713,Conversions:40.33},
+  {Date:"2026-08-17",Campaign:"CHD-Buyer-Acquisition-6April",Spends:2512.8,Impressions:2151,Clicks:581,Conversions:30.59},
+  {Date:"2026-08-17",Campaign:"AHM-UCR-Catalogue-Ads",Spends:2349.49,Impressions:53246,Clicks:2716,Conversions:19},
+  {Date:"2026-08-17",Campaign:"Chandigarh-UCR-Catalogue-Ads",Spends:3270.83,Impressions:67954,Clicks:4301,Conversions:32},
+  {Date:"2026-08-17",Campaign:"Nashik-VIA-21July-Catalogue",Spends:5617.93,Impressions:90396,Clicks:3422,Conversions:54},
+  {Date:"2026-08-17",Campaign:"AHM-VIA-Catalogue-28July",Spends:1348.78,Impressions:15740,Clicks:942,Conversions:15},
+  {Date:"2026-08-17",Campaign:"CHD-VIA-Catalogue-28july",Spends:1925.5,Impressions:16316,Clicks:348,Conversions:2},
+  {Date:"2026-08-17",Campaign:"CHD-17aug-Consolidated",Spends:1083.79,Impressions:8744,Clicks:767,Conversions:11},
+  {Date:"2026-08-17",Campaign:"AHM_14TH_Aug_Consolidated",Spends:3836.64,Impressions:36574,Clicks:4200,Conversions:102},
+  {Date:"2026-08-17",Campaign:"Nashik-17aug-Consolidated",Spends:1060.49,Impressions:10945,Clicks:493,Conversions:9}
 ];
 
+
+
 // Daily trigger rows — replaced by Apps Script; used by date filter to re-aggregate
+
 var DATA_TRIGGERS = [
   {Date:"2026-04-03",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:1,Dealer_Triggers:0},
   {Date:"2026-04-05",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:1,Dealer_Triggers:0},
@@ -2089,7 +2830,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-05-25",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:25,Dealer_Triggers:15},
   {Date:"2026-05-25",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:61,Dealer_Triggers:38},
   {Date:"2026-05-25",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:15,Dealer_Triggers:11},
-  {Date:"2026-05-25",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:33,Dealer_Triggers:20},
+  {Date:"2026-05-25",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:32,Dealer_Triggers:19},
   {Date:"2026-05-25",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:6,Dealer_Triggers:6},
   {Date:"2026-05-25",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:17,Dealer_Triggers:14},
   {Date:"2026-05-26",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:30,Dealer_Triggers:11},
@@ -2286,7 +3027,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-06-24",Campaign:"Nashik-pmax-Used-car-16june",Triggered_Leads:19,Dealer_Triggers:15},
   {Date:"2026-06-24",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:22,Dealer_Triggers:18},
   {Date:"2026-06-24",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:15,Dealer_Triggers:13},
-  {Date:"2026-06-25",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:31,Dealer_Triggers:19},
+  {Date:"2026-06-25",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:32,Dealer_Triggers:20},
   {Date:"2026-06-25",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:53,Dealer_Triggers:29},
   {Date:"2026-06-25",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:17,Dealer_Triggers:13},
   {Date:"2026-06-25",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:27,Dealer_Triggers:14},
@@ -2332,6 +3073,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-01",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:19,Dealer_Triggers:8},
   {Date:"2026-07-01",Campaign:"Nashik-pmax-Used-car-16june",Triggered_Leads:4,Dealer_Triggers:1},
   {Date:"2026-07-01",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:10,Dealer_Triggers:9},
+  {Date:"2026-07-01",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:1,Dealer_Triggers:0},
   {Date:"2026-07-01",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:14,Dealer_Triggers:11},
   {Date:"2026-07-02",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:25,Dealer_Triggers:13},
   {Date:"2026-07-02",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:55,Dealer_Triggers:33},
@@ -2352,6 +3094,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-04",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:4,Dealer_Triggers:2},
   {Date:"2026-07-04",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:14,Dealer_Triggers:9},
   {Date:"2026-07-04",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:11,Dealer_Triggers:8},
+  {Date:"2026-07-04",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:1,Dealer_Triggers:1},
   {Date:"2026-07-04",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:21,Dealer_Triggers:17},
   {Date:"2026-07-05",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:34,Dealer_Triggers:15},
   {Date:"2026-07-05",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:36,Dealer_Triggers:18},
@@ -2361,6 +3104,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-05",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:16,Dealer_Triggers:13},
   {Date:"2026-07-06",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:39,Dealer_Triggers:24},
   {Date:"2026-07-06",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:44,Dealer_Triggers:26},
+  {Date:"2026-07-06",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:1,Dealer_Triggers:1},
   {Date:"2026-07-06",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:9,Dealer_Triggers:3},
   {Date:"2026-07-06",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:13,Dealer_Triggers:9},
   {Date:"2026-07-06",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:17,Dealer_Triggers:14},
@@ -2381,7 +3125,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-08",Campaign:"Nashik-UCR-Static-Website",Triggered_Leads:5,Dealer_Triggers:5},
   {Date:"2026-07-08",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:18,Dealer_Triggers:13},
   {Date:"2026-07-09",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:42,Dealer_Triggers:23},
-  {Date:"2026-07-09",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:39,Dealer_Triggers:28},
+  {Date:"2026-07-09",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:40,Dealer_Triggers:29},
   {Date:"2026-07-09",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:10,Dealer_Triggers:9},
   {Date:"2026-07-09",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:22,Dealer_Triggers:14},
   {Date:"2026-07-09",Campaign:"Demand-Gen-Nashik-1july-UC",Triggered_Leads:11,Dealer_Triggers:7},
@@ -2408,9 +3152,10 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-12",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:6,Dealer_Triggers:3},
   {Date:"2026-07-12",Campaign:"Demand-Gen-Nashik-1july-UC",Triggered_Leads:1,Dealer_Triggers:1},
   {Date:"2026-07-12",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:20,Dealer_Triggers:18},
-  {Date:"2026-07-12",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:30,Dealer_Triggers:20},
-  {Date:"2026-07-13",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:31,Dealer_Triggers:17},
+  {Date:"2026-07-12",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:29,Dealer_Triggers:19},
+  {Date:"2026-07-13",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:30,Dealer_Triggers:16},
   {Date:"2026-07-13",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:39,Dealer_Triggers:25},
+  {Date:"2026-07-13",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:2,Dealer_Triggers:2},
   {Date:"2026-07-13",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:13,Dealer_Triggers:9},
   {Date:"2026-07-13",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:18,Dealer_Triggers:12},
   {Date:"2026-07-13",Campaign:"Demand-Gen-Nashik-1july-UC",Triggered_Leads:4,Dealer_Triggers:3},
@@ -2418,7 +3163,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-13",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:15,Dealer_Triggers:9},
   {Date:"2026-07-13",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:7,Dealer_Triggers:6},
   {Date:"2026-07-14",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:37,Dealer_Triggers:24},
-  {Date:"2026-07-14",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:32,Dealer_Triggers:11},
+  {Date:"2026-07-14",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:33,Dealer_Triggers:12},
   {Date:"2026-07-14",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:12,Dealer_Triggers:9},
   {Date:"2026-07-14",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:17,Dealer_Triggers:9},
   {Date:"2026-07-14",Campaign:"Demand-Gen-Nashik-1july-UC",Triggered_Leads:7,Dealer_Triggers:7},
@@ -2471,7 +3216,7 @@ var DATA_TRIGGERS = [
   {Date:"2026-07-20",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:17,Dealer_Triggers:16},
   {Date:"2026-07-20",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:16,Dealer_Triggers:6},
   {Date:"2026-07-20",Campaign:"Demand-Gen-Nashik-1july-UC",Triggered_Leads:8,Dealer_Triggers:6},
-  {Date:"2026-07-20",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:98,Dealer_Triggers:92},
+  {Date:"2026-07-20",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:99,Dealer_Triggers:93},
   {Date:"2026-07-20",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:18,Dealer_Triggers:11},
   {Date:"2026-07-20",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:15,Dealer_Triggers:15},
   {Date:"2026-07-21",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:27,Dealer_Triggers:16},
@@ -2607,8 +3352,8 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-04",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:23,Dealer_Triggers:20},
   {Date:"2026-08-04",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:38,Dealer_Triggers:37},
   {Date:"2026-08-04",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:13,Dealer_Triggers:11},
-  {Date:"2026-08-04",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:29,Dealer_Triggers:29},
   {Date:"2026-08-04",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:6,Dealer_Triggers:3},
+  {Date:"2026-08-04",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:29,Dealer_Triggers:29},
   {Date:"2026-08-05",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:50,Dealer_Triggers:24},
   {Date:"2026-08-05",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:67,Dealer_Triggers:57},
   {Date:"2026-08-05",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:34,Dealer_Triggers:27},
@@ -2617,9 +3362,9 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-05",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:34,Dealer_Triggers:27},
   {Date:"2026-08-05",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:11,Dealer_Triggers:11},
   {Date:"2026-08-05",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:29,Dealer_Triggers:23},
-  {Date:"2026-08-05",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:16,Dealer_Triggers:14},
   {Date:"2026-08-05",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:15,Dealer_Triggers:8},
   {Date:"2026-08-05",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:10,Dealer_Triggers:5},
+  {Date:"2026-08-05",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:16,Dealer_Triggers:14},
   {Date:"2026-08-06",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:31,Dealer_Triggers:17},
   {Date:"2026-08-06",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:69,Dealer_Triggers:60},
   {Date:"2026-08-06",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:56,Dealer_Triggers:47},
@@ -2628,9 +3373,9 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-06",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:40,Dealer_Triggers:38},
   {Date:"2026-08-06",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:6,Dealer_Triggers:5},
   {Date:"2026-08-06",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:19,Dealer_Triggers:12},
-  {Date:"2026-08-06",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:16,Dealer_Triggers:13},
   {Date:"2026-08-06",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:34,Dealer_Triggers:15},
   {Date:"2026-08-06",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:5,Dealer_Triggers:2},
+  {Date:"2026-08-06",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:16,Dealer_Triggers:13},
   {Date:"2026-08-07",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:30,Dealer_Triggers:17},
   {Date:"2026-08-07",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:91,Dealer_Triggers:85},
   {Date:"2026-08-07",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:76,Dealer_Triggers:69},
@@ -2639,9 +3384,9 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-07",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:61,Dealer_Triggers:57},
   {Date:"2026-08-07",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:19,Dealer_Triggers:18},
   {Date:"2026-08-07",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:23,Dealer_Triggers:17},
-  {Date:"2026-08-07",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:21,Dealer_Triggers:21},
   {Date:"2026-08-07",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:47,Dealer_Triggers:23},
   {Date:"2026-08-07",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:20,Dealer_Triggers:5},
+  {Date:"2026-08-07",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:21,Dealer_Triggers:21},
   {Date:"2026-08-08",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:44,Dealer_Triggers:26},
   {Date:"2026-08-08",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:60,Dealer_Triggers:52},
   {Date:"2026-08-08",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:48,Dealer_Triggers:39},
@@ -2650,9 +3395,9 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-08",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:28,Dealer_Triggers:23},
   {Date:"2026-08-08",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:53,Dealer_Triggers:50},
   {Date:"2026-08-08",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:22,Dealer_Triggers:16},
-  {Date:"2026-08-08",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:14,Dealer_Triggers:13},
   {Date:"2026-08-08",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:28,Dealer_Triggers:16},
   {Date:"2026-08-08",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:5,Dealer_Triggers:2},
+  {Date:"2026-08-08",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:14,Dealer_Triggers:13},
   {Date:"2026-08-09",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:50,Dealer_Triggers:23},
   {Date:"2026-08-09",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:101,Dealer_Triggers:88},
   {Date:"2026-08-09",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:57,Dealer_Triggers:49},
@@ -2662,845 +3407,1748 @@ var DATA_TRIGGERS = [
   {Date:"2026-08-09",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:33,Dealer_Triggers:30},
   {Date:"2026-08-09",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:25,Dealer_Triggers:23},
   {Date:"2026-08-09",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:12,Dealer_Triggers:10},
+  {Date:"2026-08-09",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:31,Dealer_Triggers:17},
+  {Date:"2026-08-09",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:13,Dealer_Triggers:7},
   {Date:"2026-08-09",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:18,Dealer_Triggers:14},
-  {Date:"2026-08-09",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:33,Dealer_Triggers:19},
-  {Date:"2026-08-09",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:13,Dealer_Triggers:7}
+  {Date:"2026-08-10",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:41,Dealer_Triggers:20},
+  {Date:"2026-08-10",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:103,Dealer_Triggers:90},
+  {Date:"2026-08-10",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:82,Dealer_Triggers:71},
+  {Date:"2026-08-10",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:24,Dealer_Triggers:14},
+  {Date:"2026-08-10",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:20,Dealer_Triggers:16},
+  {Date:"2026-08-10",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:32,Dealer_Triggers:29},
+  {Date:"2026-08-10",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:43,Dealer_Triggers:38},
+  {Date:"2026-08-10",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:14,Dealer_Triggers:8},
+  {Date:"2026-08-10",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:29,Dealer_Triggers:14},
+  {Date:"2026-08-10",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:21,Dealer_Triggers:8},
+  {Date:"2026-08-10",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:18,Dealer_Triggers:14},
+  {Date:"2026-08-11",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:27,Dealer_Triggers:20},
+  {Date:"2026-08-11",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:94,Dealer_Triggers:84},
+  {Date:"2026-08-11",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:48,Dealer_Triggers:42},
+  {Date:"2026-08-11",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:25,Dealer_Triggers:13},
+  {Date:"2026-08-11",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:35,Dealer_Triggers:32},
+  {Date:"2026-08-11",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:17,Dealer_Triggers:17},
+  {Date:"2026-08-11",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:31,Dealer_Triggers:28},
+  {Date:"2026-08-11",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:12,Dealer_Triggers:9},
+  {Date:"2026-08-11",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:30,Dealer_Triggers:19},
+  {Date:"2026-08-11",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:14,Dealer_Triggers:7},
+  {Date:"2026-08-11",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:24,Dealer_Triggers:19},
+  {Date:"2026-08-12",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:39,Dealer_Triggers:21},
+  {Date:"2026-08-12",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:37,Dealer_Triggers:34},
+  {Date:"2026-08-12",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:64,Dealer_Triggers:56},
+  {Date:"2026-08-12",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:35,Dealer_Triggers:15},
+  {Date:"2026-08-12",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:6,Dealer_Triggers:5},
+  {Date:"2026-08-12",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:37,Dealer_Triggers:34},
+  {Date:"2026-08-12",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:44,Dealer_Triggers:41},
+  {Date:"2026-08-12",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:4,Dealer_Triggers:4},
+  {Date:"2026-08-12",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:19,Dealer_Triggers:8},
+  {Date:"2026-08-12",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:15,Dealer_Triggers:4},
+  {Date:"2026-08-12",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:19,Dealer_Triggers:16},
+  {Date:"2026-08-13",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:59,Dealer_Triggers:36},
+  {Date:"2026-08-13",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:30,Dealer_Triggers:30},
+  {Date:"2026-08-13",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:54,Dealer_Triggers:49},
+  {Date:"2026-08-13",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:28,Dealer_Triggers:14},
+  {Date:"2026-08-13",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:20,Dealer_Triggers:19},
+  {Date:"2026-08-13",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:67,Dealer_Triggers:61},
+  {Date:"2026-08-13",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:25,Dealer_Triggers:17},
+  {Date:"2026-08-13",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:17,Dealer_Triggers:11},
+  {Date:"2026-08-13",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:10,Dealer_Triggers:5},
+  {Date:"2026-08-13",Campaign:"Nashik-Whatsup-Leads -13thJuly",Triggered_Leads:10,Dealer_Triggers:9},
+  {Date:"2026-08-14",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:27,Dealer_Triggers:15},
+  {Date:"2026-08-14",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:82,Dealer_Triggers:77},
+  {Date:"2026-08-14",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:78,Dealer_Triggers:75},
+  {Date:"2026-08-14",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:36,Dealer_Triggers:31},
+  {Date:"2026-08-14",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:21,Dealer_Triggers:13},
+  {Date:"2026-08-14",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:4,Dealer_Triggers:4},
+  {Date:"2026-08-14",Campaign:"Nashik-UCR-Catalogue-Ads",Triggered_Leads:22,Dealer_Triggers:22},
+  {Date:"2026-08-14",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:59,Dealer_Triggers:55},
+  {Date:"2026-08-14",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:20,Dealer_Triggers:14},
+  {Date:"2026-08-15",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:23,Dealer_Triggers:14},
+  {Date:"2026-08-15",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:65,Dealer_Triggers:60},
+  {Date:"2026-08-15",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:115,Dealer_Triggers:104},
+  {Date:"2026-08-15",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:40,Dealer_Triggers:36},
+  {Date:"2026-08-15",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:37,Dealer_Triggers:19},
+  {Date:"2026-08-15",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:12,Dealer_Triggers:10},
+  {Date:"2026-08-15",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:97,Dealer_Triggers:95},
+  {Date:"2026-08-15",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:12,Dealer_Triggers:9},
+  {Date:"2026-08-15",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:2,Dealer_Triggers:1},
+  {Date:"2026-08-15",Campaign:"Chandigarh-Whatsup-Leads-4ug",Triggered_Leads:2,Dealer_Triggers:1},
+  {Date:"2026-08-16",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:41,Dealer_Triggers:21},
+  {Date:"2026-08-16",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:85,Dealer_Triggers:72},
+  {Date:"2026-08-16",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:158,Dealer_Triggers:145},
+  {Date:"2026-08-16",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:65,Dealer_Triggers:52},
+  {Date:"2026-08-16",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:27,Dealer_Triggers:14},
+  {Date:"2026-08-16",Campaign:"CHD-VIA-Catalogue-28july",Triggered_Leads:7,Dealer_Triggers:4},
+  {Date:"2026-08-16",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:86,Dealer_Triggers:82},
+  {Date:"2026-08-16",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:13,Dealer_Triggers:11},
+  {Date:"2026-08-16",Campaign:"AHM-Whatsup-Leads-5aug",Triggered_Leads:1,Dealer_Triggers:0},
+  {Date:"2026-08-17",Campaign:"AHM-Search-Buy-Used-Car-8april",Triggered_Leads:37,Dealer_Triggers:18},
+  {Date:"2026-08-17",Campaign:"AHM-UCR-Catalogue-Ads",Triggered_Leads:24,Dealer_Triggers:21},
+  {Date:"2026-08-17",Campaign:"AHM_14TH_Aug_Consolidated",Triggered_Leads:123,Dealer_Triggers:112},
+  {Date:"2026-08-17",Campaign:"Chandigarh-UCR-Catalogue-Ads",Triggered_Leads:41,Dealer_Triggers:38},
+  {Date:"2026-08-17",Campaign:"CHD-Buyer-Acquisition-6April",Triggered_Leads:33,Dealer_Triggers:18},
+  {Date:"2026-08-17",Campaign:"Nashik-VIA-21July-Catalogue",Triggered_Leads:77,Dealer_Triggers:73},
+  {Date:"2026-08-17",Campaign:"Nasik-Search-Buy-UsedCar-8april",Triggered_Leads:14,Dealer_Triggers:11}
 ];
 
-// Organic (city-wise) leads — replaced by Apps Script on each push
+
+
+// Organic (city-wise) leads -- replaced by Apps Script on each push
 var DATA_ORGANIC = [];
 
 // Load manually-set dealer triggers for LeadForm campaigns from localStorage
+
 (function() {
+
   DATA_RAW.forEach(function(r) {
+
     if (r.Type === 'LeadForm') {
+
       var stored = localStorage.getItem('wa_dt_' + r.Campaign);
+
       if (stored !== null) r.Dealer_Triggers = parseInt(stored) || 0;
+
     }
+
   });
+
 })();
+
+
 
 // Active filtered dataset — populated by applyDateFilter()
+
 var DATA = [];
 
+
+
 var CITY_COLOR  = {Ahmedabad:'#7C3AED', Chandigarh:'#0369A1', Nashik:'#047857'};
+
 var CITY_LIGHT  = {Ahmedabad:'#F5F3FF', Chandigarh:'#EFF6FF', Nashik:'#ECFDF5'};
+
 var CITY_BORDER = {Ahmedabad:'#C4B5FD', Chandigarh:'#BAE6FD', Nashik:'#6EE7B7'};
+
 var PLAT_COLOR  = {Google:'#EA4335', Meta:'#1877F2'};
+
 var PLAT_LIGHT  = {Google:'#FEF2F2', Meta:'#EFF6FF'};
+
 var PLAT_BDR    = {Google:'#FCA5A5', Meta:'#93C5FD'};
+
 var TYPE_COLOR  = {Search:'#7C3AED', Catalogue:'#D97706', LeadForm:'#0891B2', 'Demand Gen':'#059669', 'Performance Max':'#9333EA', 'Website Conversion':'#0369A1', WhatsApp:'#25D366', YouTube:'#FF0000', Other:'#64748B'};
+
 var TYPE_LIGHT  = {Search:'#F5F3FF', Catalogue:'#FFFBEB', LeadForm:'#ECFEFF', 'Demand Gen':'#ECFDF5', 'Performance Max':'#FAF5FF', 'Website Conversion':'#EFF6FF', WhatsApp:'#F0FDF4', YouTube:'#FFF1F2', Other:'#F8FAFC'};
 
+
+
 var _today = new Date();
+
 var _pad = function(n){return n<10?'0'+n:String(n);};
+
 var TODAY_STR = _today.getFullYear()+'-'+_pad(_today.getMonth()+1)+'-'+_pad(_today.getDate());
+
 var DEFAULT_START = TODAY_STR.substring(0,7)+'-01'; // first of current month
+
 var DEFAULT_END   = TODAY_STR;
 
+
+
 // ── DATE FILTER ──────────────────────────────────────────────────────────────
+
 function applyDateFilter() {
+
   var s = document.getElementById('date-start').value;
+
   var e = document.getElementById('date-end').value;
+
   if (!s || !e || s > e) return;
 
+
+
   // Aggregate spend from DATA_DAILY for the selected date range
+
   var campAgg = {};
+
   DATA_DAILY.forEach(function(d) {
+
     if (d.Date >= s && d.Date <= e) {
+
       if (!campAgg[d.Campaign]) campAgg[d.Campaign] = {Spends:0, Impressions:0, Clicks:0, Conversions:0};
+
       campAgg[d.Campaign].Spends      += d.Spends;
+
       campAgg[d.Campaign].Impressions += d.Impressions;
+
       campAgg[d.Campaign].Clicks      += d.Clicks;
+
       campAgg[d.Campaign].Conversions += d.Conversions;
+
     }
+
   });
+
+
 
   // Aggregate triggers from DATA_TRIGGERS for the selected range
+
   var campTrigAgg = {};
+
   DATA_TRIGGERS.forEach(function(d) {
+
     if (d.Date >= s && d.Date <= e) {
+
       if (!campTrigAgg[d.Campaign]) campTrigAgg[d.Campaign] = {Triggered_Leads:0, Dealer_Triggers:0};
+
       campTrigAgg[d.Campaign].Triggered_Leads += d.Triggered_Leads;
+
       campTrigAgg[d.Campaign].Dealer_Triggers += d.Dealer_Triggers;
+
     }
+
   });
+
+
 
   // If no daily data yet (DATA_DAILY empty), fall back to campaign-overlap filter on DATA_RAW totals
+
   if (DATA_DAILY.length === 0) {
+
     DATA = DATA_RAW.filter(function(r) {
+
       var cs = r.StartDate || '2026-04-06';
+
       var ce = r.EndDate   || TODAY_STR;
+
       return cs <= e && ce >= s;
+
     });
+
   } else {
+
     // Build DATA: merge daily-aggregated spend + triggers with campaign metadata
+
     DATA = DATA_RAW
+
       .filter(function(r) { return campAgg[r.Campaign]; })
+
       .map(function(r) {
+
         var a = campAgg[r.Campaign];
+
         var trig = campTrigAgg[r.Campaign];
+
         // LeadForm: use manual localStorage value; all others: use date-filtered totals (0 if no rows match)
+
         var gl = DATA_TRIGGERS.length ? (trig ? trig.Triggered_Leads : 0) : r.Triggered_Leads;
+
         var dt = (r.Type === 'LeadForm') ? r.Dealer_Triggers
+
                : DATA_TRIGGERS.length ? (trig ? trig.Dealer_Triggers : 0) : r.Dealer_Triggers;
+
         return {
+
           Campaign:        r.Campaign,
+
           Platform:        r.Platform,
+
           City:            r.City,
+
           Type:            r.Type,
+
           Status:          r.Status,
+
           StartDate:       r.StartDate,
+
           EndDate:         r.EndDate,
+
           Triggered_Leads: gl,
+
           Dealer_Triggers: dt,
+
           Spends:          Math.round(a.Spends * 100) / 100,
+
           Impressions:     Math.round(a.Impressions),
+
           Clicks:          Math.round(a.Clicks),
+
           Conversions:     Math.round(a.Conversions * 100) / 100
+
         };
+
       });
+
   }
+
+
 
   var badge = document.getElementById('filter-active-badge');
+
   var periodBadge = document.getElementById('period-badge');
+
   var isDefault = (s === DEFAULT_START && e === DEFAULT_END);
+
   badge.style.display = isDefault ? 'none' : 'inline-block';
+
   periodBadge.textContent = formatDateRange(s, e);
 
+
+
   // Invalidate rendered panes so they re-render
+
   ['overview','city','campaigns','types','comparison'].forEach(function(id) {
+
     var el = document.getElementById('pane-' + id);
+
     if (el) { el.dataset.done = ''; el.innerHTML = ''; }
+
   });
+
+
 
   // Re-render active pane
+
   var activeTab = document.querySelector('.tab.active');
+
   if (activeTab) {
+
     var ids = ['overview','city','campaigns','types','comparison'];
+
     document.querySelectorAll('.tab').forEach(function(t, i) {
+
       if (t.classList.contains('active')) switchTab(ids[i]);
+
     });
+
   } else {
+
     renderOverview();
+
   }
+
 }
+
+
 
 function resetDateFilter() {
+
   document.getElementById('date-start').value = DEFAULT_START;
+
   document.getElementById('date-end').value   = DEFAULT_END;
+
   applyDateFilter();
+
 }
+
+
 
 function formatDateRange(s, e) {
+
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
   function fmt(d) {
+
     var p = d.split('-');
+
     return p[2].replace(/^0/,'') + ' ' + months[parseInt(p[1],10)-1] + ' ' + p[0];
+
   }
+
   return fmt(s) + ' – ' + fmt(e);
+
 }
+
+
 
 // Set date inputs and run initial filter to populate DATA
+
 (function() {
+
   var s = document.getElementById('date-start');
+
   var e = document.getElementById('date-end');
+
   s.value = DEFAULT_START; s.max = TODAY_STR;
+
   e.value = DEFAULT_END;   e.max = TODAY_STR;
+
   applyDateFilter();
+
 })();
+
 document.getElementById('date-start').addEventListener('change', applyDateFilter);
+
 document.getElementById('date-end').addEventListener('change', applyDateFilter);
 
+
+
 // ── HELPERS ──────────────────────────────────────────────────────────────────
+
 function INR(v)  { return '₹'+Number(v).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+
 function NUM(v)  { return Number(v).toLocaleString('en-IN'); }
+
 function PCT(v)  { return (v*100).toFixed(1)+'%'; }
+
 function agg(rows) {
+
   return rows.reduce(function(a,r) {
+
     a.sp+=r.Spends; a.imp+=r.Impressions; a.cl+=r.Clicks;
+
     a.cv+=r.Conversions; a.gl+=r.Triggered_Leads; a.dt+=r.Dealer_Triggers;
+
     return a;
+
   },{sp:0,imp:0,cl:0,cv:0,gl:0,dt:0});
+
 }
+
 function cpl(sp,gl)   { return gl>0?sp/gl:null; }
+
 function cpm(sp,imp)  { return imp>0?sp/imp*1000:null; }
+
 function ctr(cl,imp)  { return imp>0?cl/imp:null; }
+
 function fmt(v,dec)   { return v==null?'—':'₹'+v.toFixed(dec||0).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
 function fmtN(v)      { return v==null?'—':v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
 
+
+
 function cityBadge(city) {
+
   return '<span class="city-badge" style="background:'+CITY_LIGHT[city]+';color:'+CITY_COLOR[city]+';border:1px solid '+CITY_BORDER[city]+'">'+city+'</span>';
+
 }
+
 function platBadge(p) {
+
   return '<span class="plat-badge" style="background:'+PLAT_LIGHT[p]+';color:'+PLAT_COLOR[p]+';border:1px solid '+PLAT_BDR[p]+'">'+p+'</span>';
+
 }
+
 function statusBadge(s) {
+
   if(!s) return '';
+
   if(s==='Ongoing') return '<span class="status-ongoing"><span style="width:5px;height:5px;border-radius:50%;background:#047857;display:inline-block"></span>Ongoing</span>';
+
   if(s==='Experiment · Ongoing') return '<span class="status-exp-ongoing"><span style="width:5px;height:5px;border-radius:50%;background:#CA8A04;display:inline-block"></span>Exp · Active</span>';
+
   if(s==='Experiment · Paused')  return '<span class="status-exp-paused"><span style="width:5px;height:5px;border-radius:50%;background:#94A3B8;display:inline-block"></span>Exp · Paused</span>';
+
   return '<span class="status-exp-paused">'+s+'</span>';
+
 }
+
 function typeBadge(t) {
+
   var c=TYPE_COLOR[t]||'#64748B', l=TYPE_LIGHT[t]||'#F8FAFC';
+
   return '<span class="type-badge" style="background:'+l+';color:'+c+'">'+t+'</span>';
+
 }
+
+
 
 function noDataMsg() {
+
   return '<div class="no-data-msg"><strong>No campaigns in this date range</strong>Adjust the date filter to see data.</div>';
+
 }
+
+
 
 function updateWaDt(input, campaign) {
+
   var val = parseInt(input.value) || 0;
+
   localStorage.setItem('wa_dt_' + campaign, val);
+
   DATA_RAW.forEach(function(r) { if (r.Campaign === campaign) r.Dealer_Triggers = val; });
+
   DATA.forEach(function(r)     { if (r.Campaign === campaign) r.Dealer_Triggers = val; });
+
   // Invalidate all other panes so updated value is reflected everywhere
+
   ['overview','city','types','comparison'].forEach(function(id) {
+
     var el = document.getElementById('pane-' + id);
+
     if (el) { el.dataset.done = ''; el.innerHTML = ''; }
+
   });
+
   renderCampaigns();
+
 }
+
 window.updateWaDt = updateWaDt;
 
+
+
 // ── TAB SWITCH ───────────────────────────────────────────────────────────────
+
 function switchTab(id) {
+
   document.querySelectorAll('.tab').forEach(function(t,i) {
+
     var ids=['overview','city','campaigns','types','comparison'];
+
     t.classList.toggle('active', ids[i]===id);
+
   });
+
   document.querySelectorAll('.pane').forEach(function(p) { p.classList.remove('active'); });
+
   document.getElementById('pane-'+id).classList.add('active');
+
   if(id==='overview')   renderOverview();
+
   if(id==='city')       renderCity();
+
   if(id==='campaigns')  renderCampaigns();
+
   if(id==='comparison') renderComparison();
+
 }
+
 window.switchTab = switchTab;
 
+
+
 // ── TREND & COMPARISON ────────────────────────────────────────────────────────
+
 function renderComparison() {
+
   var el = document.getElementById('pane-comparison');
+
   if (!el) return;
 
+
+
   var s = document.getElementById('date-start').value;
+
   var e = document.getElementById('date-end').value;
+
   if (!s || !e) { el.innerHTML = noDataMsg(); return; }
 
+
+
   var period  = (document.getElementById('comp-period')||{value:'daily'}).value||'daily';
+
   var selType = (document.getElementById('comp-type')||{value:'All'}).value||'All';
 
+
+
   var CITIES_ALL = ['Ahmedabad','Chandigarh','Nashik'];
+
   var CC = {Ahmedabad:'#7C3AED', Chandigarh:'#0369A1', Nashik:'#047857'};
 
+
+
   var citiesRaw = (document.getElementById('comp-cities')||{value:''}).value||'';
+
   var selCities = citiesRaw ? citiesRaw.split(',').filter(function(c){return CITIES_ALL.indexOf(c)>=0;}) : CITIES_ALL.slice();
+
   if (!selCities.length) selCities = CITIES_ALL.slice();
 
+
+
   var SERIES_ALL = [
+
     {k:'sp',  label:'Spends',       color:'#3B82F6', dash:false},
+
     {k:'gl',  label:'Trig. Leads',  color:'#7C3AED', dash:false},
+
     {k:'dt',  label:'Dealer Trig.', color:'#059669', dash:false},
+
     {k:'tcpl',label:'TCPL',         color:'#F59E0B', dash:true},
+
     {k:'dcpl',label:'Dealer CPL',   color:'#EF4444', dash:true}
+
   ];
+
   var kpisRaw = (document.getElementById('comp-kpis')||{value:''}).value||'';
+
   var selKpis = kpisRaw ? kpisRaw.split(',').filter(function(k){return k;}) : ['sp'];
+
   if (!selKpis.length) selKpis = ['sp'];
+
   var activeSeries = SERIES_ALL.filter(function(s){ return selKpis.indexOf(s.k)>=0; });
 
+
+
   // All campaign types from DATA_RAW
+
   var allTypes = ['All'];
+
   var _ts = {};
+
   DATA_RAW.forEach(function(r){ if(r.Type&&!_ts[r.Type]){_ts[r.Type]=1;allTypes.push(r.Type);} });
 
+
+
   // Build city → campaign set (filtered by type)
+
   var cityCamps = {}; CITIES_ALL.forEach(function(c){cityCamps[c]={};});
+
   DATA_RAW.forEach(function(r){
+
     if (selType!=='All' && r.Type!==selType) return;
+
     if (cityCamps[r.City]) cityCamps[r.City][r.Campaign]=1;
+
   });
+
+
 
   // Bucket helpers
+
   function getBucket(date) {
+
     if (period==='weekly') {
+
       var d=new Date(date+'T00:00:00'); var day=d.getDay();
+
       d.setDate(d.getDate()-day+(day===0?-6:1));
+
       var mm=d.getMonth()+1,dd=d.getDate();
+
       return d.getFullYear()+'-'+(mm<10?'0'+mm:mm)+'-'+(dd<10?'0'+dd:dd);
+
     }
+
     if (period==='monthly') return date.substring(0,7);
+
     return date;
+
   }
+
   function bucketLabel(b) {
+
     var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
     if (period==='monthly'){var p=b.split('-');return M[+p[1]-1]+' '+p[0];}
+
     if (period==='weekly'){
+
       var start=new Date(b+'T00:00:00');
+
       var end=new Date(start); end.setDate(end.getDate()+6);
+
       var sm=M[start.getMonth()],sd=start.getDate();
+
       var em=M[end.getMonth()],ed=end.getDate();
+
       return sd+' '+sm+(sm!==em?' – '+ed+' '+em:' – '+ed);
+
     }
+
     var p=b.split('-'); return p[2].replace(/^0/,'')+' '+M[+p[1]-1];
+
   }
+
+
 
   // Aggregate per city per bucket
+
   var cityMaps={}; CITIES_ALL.forEach(function(c){cityMaps[c]={};});
+
   function ensureBucket(map,b){if(!map[b])map[b]={sp:0,imp:0,cl:0,cv:0,gl:0,dt:0};}
 
+
+
   DATA_DAILY.forEach(function(d){
+
     if(d.Date<s||d.Date>e) return;
+
     var b=getBucket(d.Date);
+
     CITIES_ALL.forEach(function(c){ if(cityCamps[c][d.Campaign]){ensureBucket(cityMaps[c],b); var r=cityMaps[c][b]; r.sp+=d.Spends;r.imp+=d.Impressions;r.cl+=d.Clicks;r.cv+=d.Conversions;} });
+
   });
+
   DATA_TRIGGERS.forEach(function(d){
+
     if(d.Date<s||d.Date>e) return;
+
     var b=getBucket(d.Date);
+
     CITIES_ALL.forEach(function(c){ if(cityCamps[c][d.Campaign]){ensureBucket(cityMaps[c],b); var r=cityMaps[c][b]; r.gl+=d.Triggered_Leads;r.dt+=d.Dealer_Triggers;} });
+
   });
+
+
 
   // Merge selected cities into one combined map
+
   var mergedMap={};
+
   function ensureMerged(b){if(!mergedMap[b])mergedMap[b]={sp:0,imp:0,cl:0,cv:0,gl:0,dt:0};}
+
   selCities.forEach(function(c){
+
     Object.keys(cityMaps[c]).forEach(function(b){
+
       ensureMerged(b);
+
       var src=cityMaps[c][b],dst=mergedMap[b];
+
       dst.sp+=src.sp;dst.gl+=src.gl;dst.dt+=src.dt;dst.cv+=src.cv;dst.imp+=src.imp;dst.cl+=src.cl;
+
     });
+
   });
 
+
+
   // Union of all buckets (all cities, so timeline is stable regardless of city filter)
+
   var bucketSet={}; CITIES_ALL.forEach(function(c){Object.keys(cityMaps[c]).forEach(function(b){bucketSet[b]=1;});});
+
   var buckets=Object.keys(bucketSet).sort();
+
   var labels=buckets.map(bucketLabel);
+
+
 
   if(!buckets.length){el.innerHTML=noDataMsg();return;}
 
+
+
   function seriesVal(r, k) {
+
     if (!r) return 0;
+
     if (k==='tcpl') return r.gl ? r.sp/r.gl : 0;
+
     if (k==='dcpl') return r.dt ? r.sp/r.dt : 0;
+
     return r[k] || 0;
+
   }
+
+
 
   // Ensure HTML tooltip div exists once in DOM
+
   if(!document.getElementById('ctip')){
+
     var _td=document.createElement('div'); _td.id='ctip';
+
     _td.style.cssText='position:fixed;display:none;background:rgba(17,24,39,0.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-radius:10px;padding:10px 14px;font-size:12px;font-family:Inter,system-ui,sans-serif;z-index:9999;pointer-events:none;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,0.22);line-height:1.7;border:1px solid rgba(255,255,255,0.1)';
+
     document.body.appendChild(_td);
+
   }
+
+
 
   function svgChart() {
+
     var W=880,H=240,pL=52,pR=20,pT=18,pB=44;
+
     var cW=W-pL-pR,cH=H-pT-pB,n=buckets.length;
+
     function xp(i){return Math.round(pL+(n<=1?cW/2:i*cW/(n-1)));}
+
     var multiKpi = activeSeries.length > 1;
+
     var seriesData=activeSeries.map(function(s){
+
       var vals=buckets.map(function(b){return seriesVal(mergedMap[b],s.k);});
+
       var mx=Math.max.apply(null,vals.concat([1])); if(mx===0)mx=1;
+
       return {s:s,vals:vals,maxV:mx};
+
     });
+
     function fmtY(v){return v>=1e5?(v/1e5).toFixed(1)+'L':v>=1e3?(v/1e3).toFixed(1)+'K':Math.round(v)+'';}
+
     function yp(v,maxV){return Math.round(pT+cH-(v/maxV)*cH);}
+
     var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">';
+
     for(var g=0;g<=4;g++){
+
       var gy=Math.round(pT+cH*(1-g/4));
+
       svg+='<line x1="'+pL+'" y1="'+gy+'" x2="'+(W-pR)+'" y2="'+gy+'" stroke="'+(g===0?'#E4E7EC':'#F2F4F7')+'" stroke-width="1"/>';
+
       var yLbl = multiKpi ? (g*25)+'%' : fmtY(seriesData[0].maxV*g/4);
+
       svg+='<text x="'+(pL-6)+'" y="'+(gy+4)+'" text-anchor="end" font-size="10" fill="#98A2B3" font-family="Inter,system-ui,sans-serif">'+yLbl+'</text>';
+
     }
+
     var step=Math.max(1,Math.ceil(n/10));
+
     for(var i=0;i<n;i++){
+
       if(i%step!==0&&i!==n-1) continue;
+
       svg+='<text x="'+xp(i)+'" y="'+(H-pB+16)+'" text-anchor="middle" font-size="10" fill="#98A2B3" font-family="Inter,system-ui,sans-serif">'+labels[i]+'</text>';
+
     }
+
     seriesData.slice().reverse().forEach(function(sd){
+
       var lp='',started=false;
+
       for(var i=0;i<n;i++){
+
         var v=sd.vals[i];
+
         if(v>0){if(!started){lp+='M '+xp(i)+','+yp(v,sd.maxV);started=true;}else lp+=' L '+xp(i)+','+yp(v,sd.maxV);}
+
         else started=false;
+
       }
+
       if(lp) svg+='<path d="'+lp+'" fill="none" stroke="'+sd.s.color+'" stroke-width="2.5" '+(sd.s.dash?'stroke-dasharray="6 3"':'')+' stroke-linejoin="round" stroke-linecap="round" style="pointer-events:none"/>';
+
       for(var i=0;i<n;i++){
+
         var v=sd.vals[i]; if(v<=0) continue;
+
         svg+='<circle cx="'+xp(i)+'" cy="'+yp(v,sd.maxV)+'" r="3.5" fill="'+sd.s.color+'" stroke="#fff" stroke-width="2" style="pointer-events:none"/>';
+
       }
+
     });
+
     for(var i=0;i<n;i++){
+
       var cx=xp(i);
+
       var r=mergedMap[buckets[i]]||{sp:0,gl:0,dt:0};
+
       var td=JSON.stringify({
+
         d:labels[i], c:selCities.join(' + '),
+
         sp:Math.round(r.sp),gl:Math.round(r.gl),dt:Math.round(r.dt),
+
         tcpl:r.gl?Math.round(r.sp/r.gl):0,
+
         dcpl:r.dt?Math.round(r.sp/r.dt):0
+
       }).replace(/"/g,'&quot;');
+
       var x0=i===0?pL:Math.round((xp(Math.max(0,i-1))+cx)/2);
+
       var x1=i===n-1?W-pR:Math.round((cx+xp(Math.min(n-1,i+1)))/2);
+
       svg+='<rect x="'+x0+'" y="'+pT+'" width="'+(x1-x0)+'" height="'+cH+'" fill="transparent" style="cursor:crosshair" data-tip="'+td+'" onmouseenter="showCTip(event,this)" onmouseleave="hideCTip()" />';
+
     }
+
     svg+='</svg>';
+
     var legend='<div style="display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 8px;justify-content:center;align-items:center">';
+
     activeSeries.forEach(function(s){
+
       legend+='<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)">'
+
         +'<svg width="22" height="10" style="flex-shrink:0"><line x1="0" y1="5" x2="22" y2="5" stroke="'+s.color+'" stroke-width="2"'+(s.dash?' stroke-dasharray="5 2"':'')+'/></svg>'
+
         +'<span>'+s.label+'</span></div>';
+
     });
+
     if(multiKpi) legend+='<span style="font-size:10px;color:var(--text3);margin-left:4px">· each line scaled to its own max (Y = %)</span>';
+
     legend+='</div>';
+
     return legend+svg;
+
   }
+
+
 
   // ── HTML ──
+
   var html='';
 
+
+
   // Filter bar
+
   var fbStyle='display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;padding:14px 20px;border-radius:14px;border:1px solid var(--border);margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.04)';
+
   html+='<div style="'+fbStyle+'">';
 
+
+
   // Period
+
   html+='<div style="display:flex;align-items:center;gap:6px">';
+
   html+='<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Period</span>';
+
   ['daily','weekly','monthly'].forEach(function(p){
+
     var a=p===period;
+
     html+='<button onclick="setCompPeriod(\''+p+'\')" style="padding:5px 13px;font-size:12px;font-family:inherit;font-weight:'+(a?600:400)+';border-radius:7px;border:1px solid '+(a?'var(--navy)':'var(--border2)')+';background:'+(a?'var(--navy)':'transparent')+';color:'+(a?'#fff':'var(--text2)')+';cursor:pointer;transition:all .15s">'+(p.charAt(0).toUpperCase()+p.slice(1))+'</button>';
+
   });
+
   html+='</div>';
 
+
+
   html+='<div style="width:1px;height:26px;background:var(--border);flex-shrink:0"></div>';
+
+
 
   // Campaign type dropdown
+
   html+='<div style="display:flex;align-items:center;gap:7px">';
+
   html+='<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Type</span>';
+
   html+='<select onchange="setCompType(encodeURIComponent(this.value))" style="font-size:12px;font-family:inherit;padding:5px 10px;border-radius:8px;border:1px solid var(--border2);background:#fff;color:var(--text);cursor:pointer;min-width:140px;outline:none">';
+
   allTypes.forEach(function(t){ html+='<option value="'+t+'"'+(t===selType?' selected':'')+'>'+t+'</option>'; });
+
   html+='</select></div>';
 
+
+
   html+='<div style="width:1px;height:26px;background:var(--border);flex-shrink:0"></div>';
+
+
 
   // City checkboxes
+
   html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+
   html+='<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">Cities</span>';
+
   CITIES_ALL.forEach(function(c){
+
     var chk=selCities.indexOf(c)>=0;
+
     html+='<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--text2);user-select:none">'
+
       +'<input type="checkbox" '+(chk?'checked':'')+' onchange="toggleCompCity(\''+c+'\')" style="cursor:pointer;accent-color:'+CC[c]+';width:14px;height:14px">'
+
       +'<span style="width:8px;height:8px;border-radius:50%;background:'+CC[c]+';display:inline-block;flex-shrink:0"></span>'
+
       +c+'</label>';
+
   });
+
   html+='</div>';
+
+
 
   html+='<div style="width:1px;height:26px;background:var(--border);flex-shrink:0"></div>';
 
+
+
   // KPI checkboxes
+
   html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+
   html+='<span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">KPIs</span>';
+
   SERIES_ALL.forEach(function(s){
+
     var chk=selKpis.indexOf(s.k)>=0;
+
     html+='<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--text2);user-select:none">'
+
       +'<input type="checkbox" '+(chk?'checked':'')+' onchange="toggleCompKpi(\''+s.k+'\')" style="cursor:pointer;accent-color:'+s.color+';width:14px;height:14px">'
+
       +'<svg width="18" height="8" style="flex-shrink:0"><line x1="0" y1="4" x2="18" y2="4" stroke="'+s.color+'" stroke-width="2"'+(s.dash?' stroke-dasharray="4 2"':'')+'/></svg>'
+
       +s.label+'</label>';
+
   });
+
   html+='</div>';
+
+
 
   html+='<span style="margin-left:auto;font-size:11px;color:var(--text3)">'+labels.length+' '+period+(labels.length!==1?'s':'')+' · hover for values</span>';
+
   html+='</div>';
 
+
+
   // ── Jun vs July comparison grid ──────────────────────────────
+
   function aggPeriod(startDate, endDate) {
+
     var acc = {sp:0,imp:0,cl:0,cv:0,gl:0,dt:0};
+
     DATA_DAILY.forEach(function(d){
+
       if(d.Date<startDate||d.Date>endDate) return;
+
       selCities.forEach(function(c){ if(cityCamps[c][d.Campaign]){ acc.sp+=d.Spends;acc.imp+=d.Impressions;acc.cl+=d.Clicks;acc.cv+=d.Conversions; } });
+
     });
+
     DATA_TRIGGERS.forEach(function(d){
+
       if(d.Date<startDate||d.Date>endDate) return;
+
       selCities.forEach(function(c){ if(cityCamps[c][d.Campaign]){ acc.gl+=d.Triggered_Leads;acc.dt+=d.Dealer_Triggers; } });
+
     });
+
     return acc;
+
   }
+
   var jun = aggPeriod('2026-06-01','2026-06-30');
+
   var jul = aggPeriod('2026-07-01','2026-07-31');
 
+
+
   function pctDelta(a, b) { if(!a) return b>0?100:0; return Math.round((b-a)/a*100); }
+
   // single-metric card (no sub-metric)
+
   function gridKpi(label, junVal, julVal, fmt, unit) {
+
     var delta = pctDelta(junVal, julVal);
+
     var up = delta >= 0;
+
     var isGood = unit==='cpl' ? !up : up;
+
     var accent = isGood ? '#059669' : '#DC2626';
+
     var bg     = isGood ? 'linear-gradient(145deg,#F0FDF4,#DCFCE7)' : 'linear-gradient(145deg,#FFF1F2,#FFE4E6)';
+
     var border = isGood ? '#86EFAC' : '#FCA5A5';
+
     var badge  = isGood ? '#059669' : '#DC2626';
+
     return '<div style="flex:1;background:'+bg+';border:1.5px solid '+border+';border-radius:13px;padding:11px 13px 10px;display:flex;flex-direction:column;gap:0;box-shadow:0 1px 4px rgba(0,0,0,0.05)">'
+
       +'<div style="height:3px;background:'+accent+';border-radius:2px;margin-bottom:8px;opacity:.75"></div>'
+
       +'<div style="font-size:9.5px;font-weight:700;color:'+accent+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">'+label+'</div>'
+
       +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px">'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.55);border-radius:7px;padding:5px 7px">'
+
           +'<div style="font-size:8px;color:#6B7280;font-weight:600;margin-bottom:1px">JUN</div>'
+
           +'<div style="font-size:11px;font-weight:700;color:#374151;white-space:nowrap">'+fmt(junVal)+'</div>'
+
         +'</div>'
+
         +'<div style="font-size:10px;color:#9CA3AF;flex-shrink:0">→</div>'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.88);border-radius:7px;padding:5px 7px;box-shadow:0 1px 3px rgba(0,0,0,0.07)">'
+
           +'<div style="font-size:8px;color:'+accent+';font-weight:700;margin-bottom:1px">JUL</div>'
+
           +'<div style="font-size:11px;font-weight:800;color:#111827;white-space:nowrap">'+fmt(julVal)+'</div>'
+
         +'</div>'
+
       +'</div>'
+
       +'<div style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;background:'+badge+';width:fit-content">'
+
         +'<span style="font-size:9.5px;color:#fff;font-weight:700">'+(up?'▲':'▼')+' '+(delta>0?'+':'')+delta+'%</span>'
+
       +'</div>'
+
     +'</div>';
+
   }
+
+
 
   // stacked card: primary metric on top, cost metric (CPL) below as a sub-row
+
   function gridKpiDouble(label, junVal, julVal, fmt,
+
                          subLabel, junSub, julSub, fmtSub) {
+
     var delta    = pctDelta(junVal, julVal);
+
     var subDelta = pctDelta(junSub, julSub);
+
     var isGood   = delta >= 0;                      // primary drives color
+
     var subGood  = subDelta <= 0;                   // CPL: lower is better
+
     var accent   = isGood ? '#059669' : '#DC2626';
+
     var bg       = isGood ? 'linear-gradient(145deg,#F0FDF4,#DCFCE7)' : 'linear-gradient(145deg,#FFF1F2,#FFE4E6)';
+
     var border   = isGood ? '#86EFAC' : '#FCA5A5';
+
     var badge    = isGood ? '#059669' : '#DC2626';
+
     var subBadge = subGood ? '#059669' : '#DC2626';
+
     return '<div style="flex:1;background:'+bg+';border:1.5px solid '+border+';border-radius:13px;padding:11px 13px 10px;display:flex;flex-direction:column;gap:0;box-shadow:0 1px 4px rgba(0,0,0,0.05)">'
+
       +'<div style="height:3px;background:'+accent+';border-radius:2px;margin-bottom:8px;opacity:.75"></div>'
+
       // primary
+
       +'<div style="font-size:9.5px;font-weight:700;color:'+accent+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">'+label+'</div>'
+
       +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.55);border-radius:7px;padding:5px 7px">'
+
           +'<div style="font-size:8px;color:#6B7280;font-weight:600;margin-bottom:1px">JUN</div>'
+
           +'<div style="font-size:11px;font-weight:700;color:#374151;white-space:nowrap">'+fmt(junVal)+'</div>'
+
         +'</div>'
+
         +'<div style="font-size:10px;color:#9CA3AF;flex-shrink:0">→</div>'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.88);border-radius:7px;padding:5px 7px;box-shadow:0 1px 3px rgba(0,0,0,0.07)">'
+
           +'<div style="font-size:8px;color:'+accent+';font-weight:700;margin-bottom:1px">JUL</div>'
+
           +'<div style="font-size:11px;font-weight:800;color:#111827;white-space:nowrap">'+fmt(julVal)+'</div>'
+
         +'</div>'
+
       +'</div>'
+
       +'<div style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;background:'+badge+';width:fit-content;margin-bottom:9px">'
+
         +'<span style="font-size:9.5px;color:#fff;font-weight:700">'+(delta>=0?'▲':'▼')+' '+(delta>0?'+':'')+delta+'%</span>'
+
       +'</div>'
+
       // divider
+
       +'<div style="height:1px;background:'+border+';margin-bottom:8px;opacity:.7"></div>'
+
       // sub metric (CPL)
+
       +'<div style="font-size:9px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+subLabel+'</div>'
+
       +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.45);border-radius:6px;padding:4px 7px">'
+
           +'<div style="font-size:8px;color:#6B7280;font-weight:600;margin-bottom:1px">JUN</div>'
+
           +'<div style="font-size:10.5px;font-weight:700;color:#374151;white-space:nowrap">'+fmtSub(junSub)+'</div>'
+
         +'</div>'
+
         +'<div style="font-size:10px;color:#9CA3AF;flex-shrink:0">→</div>'
+
         +'<div style="flex:1;background:rgba(255,255,255,0.78);border-radius:6px;padding:4px 7px">'
+
           +'<div style="font-size:8px;color:'+subBadge+';font-weight:700;margin-bottom:1px">JUL</div>'
+
           +'<div style="font-size:10.5px;font-weight:800;color:#111827;white-space:nowrap">'+fmtSub(julSub)+'</div>'
+
         +'</div>'
+
       +'</div>'
+
       +'<div style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;background:'+subBadge+';width:fit-content">'
+
         +'<span style="font-size:9px;color:#fff;font-weight:700">'+(subDelta<=0?'▼':'▲')+' '+(subDelta>0?'+':'')+subDelta+'%</span>'
+
       +'</div>'
+
     +'</div>';
+
   }
 
+
+
   var junTcpl = jun.gl ? jun.sp/jun.gl : 0;
+
   var julTcpl = jul.gl ? jul.sp/jul.gl : 0;
+
   var junDcpl = jun.dt ? jun.sp/jun.dt : 0;
+
   var julDcpl = jul.dt ? jul.sp/jul.dt : 0;
 
+
+
   var cityLabel = selCities.length===3 ? 'All Cities' : selCities.join(' + ');
+
   html += '<div style="margin-bottom:20px">';
+
   html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">';
+
   html += '<span style="font-size:13px;font-weight:700;color:var(--text)">Jun vs Jul — '+cityLabel+'</span>';
+
   html += '<span style="font-size:11px;color:var(--text3);background:var(--bg2,#F9FAFB);padding:3px 9px;border-radius:20px;border:1px solid var(--border)">Monthly Comparison</span>';
+
   html += '</div>';
+
   html += '<div style="display:flex;gap:10px;flex-wrap:nowrap;align-items:stretch">';
+
   html += gridKpi('Spends', jun.sp, jul.sp, function(v){return INR(Math.round(v));}, 'spend');
+
   html += gridKpiDouble(
+
     'Trig. Leads', jun.gl, jul.gl, function(v){return NUM(Math.round(v));},
+
     'TCPL',        junTcpl, julTcpl, function(v){return v?INR(Math.round(v)):'—';}
+
   );
+
   html += gridKpiDouble(
+
     'Dealer Trig.', jun.dt, jul.dt, function(v){return NUM(Math.round(v));},
+
     'Dealer CPL',   junDcpl, julDcpl, function(v){return v?INR(Math.round(v)):'—';}
+
   );
+
   html += '</div></div>';
 
+
+
   // Single chart card
+
   var tot={sp:0,cv:0,gl:0,dt:0};
+
   buckets.forEach(function(b){var r=mergedMap[b];if(r){tot.sp+=r.sp;tot.cv+=r.cv;tot.gl+=r.gl;tot.dt+=r.dt;}});
+
   var hasData=tot.sp>0||tot.gl>0;
 
+
+
   html+='<div style="background:#fff;border-radius:14px;border:1px solid var(--border);margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04)">';
+
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--border)">';
+
   html+='<span style="font-size:15px;font-weight:700;color:var(--text)">'+selCities.join(' · ')+'</span>';
+
   html+='<div style="display:flex;gap:20px">';
+
   [['Spends',INR(Math.round(tot.sp))],['Trig. Leads',NUM(tot.gl)],['Dealer Trig.',NUM(tot.dt)],['TCPL',tot.gl?INR(Math.round(tot.sp/tot.gl)):'—'],['Dealer CPL',tot.dt?INR(Math.round(tot.sp/tot.dt)):'—']].forEach(function(c){
+
     html+='<div style="text-align:right"><div style="font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.4px">'+c[0]+'</div><div style="font-size:13px;font-weight:700;color:var(--text)">'+c[1]+'</div></div>';
+
   });
+
   html+='</div></div>';
+
   html+='<div style="padding:16px 20px 10px">';
+
   if(!hasData) html+='<div style="height:80px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px">No data for this filter</div>';
+
   else html+=svgChart();
+
   html+='</div></div>';
+
+
+
 
 
   el.innerHTML=html;
+
 }
+
+
 
 function setCompPeriod(p) {
+
   var el = document.createElement('input');
+
   el.id = 'comp-period'; el.type = 'hidden'; el.value = p;
+
   var old = document.getElementById('comp-period');
+
   if (old) old.parentNode.replaceChild(el, old);
+
   else document.body.appendChild(el);
+
   document.getElementById('pane-comparison').dataset.done = '';
+
   renderComparison();
+
 }
+
 window.setCompPeriod = setCompPeriod;
 
+
+
 function setCompType(t) {
+
   t = decodeURIComponent(t);
+
   var el = document.createElement('input');
+
   el.id = 'comp-type'; el.type = 'hidden'; el.value = t;
+
   var old = document.getElementById('comp-type');
+
   if (old) old.parentNode.replaceChild(el, old);
+
   else document.body.appendChild(el);
+
   document.getElementById('pane-comparison').dataset.done = '';
+
   renderComparison();
+
 }
+
 window.setCompType = setCompType;
 
+
+
 function setCompKpi(k) {
+
   var el = document.createElement('input');
+
   el.id = 'comp-kpi'; el.type = 'hidden'; el.value = k;
+
   var old = document.getElementById('comp-kpi');
+
   if (old) old.parentNode.replaceChild(el, old);
+
   else document.body.appendChild(el);
+
   document.getElementById('pane-comparison').dataset.done = '';
+
   renderComparison();
+
 }
+
 window.setCompKpi = setCompKpi;
 
+
+
 function toggleCompCity(city) {
+
   var raw = (document.getElementById('comp-cities')||{value:''}).value||'';
+
   var CITIES_ALL = ['Ahmedabad','Chandigarh','Nashik'];
+
   var sel = raw ? raw.split(',').filter(function(c){return CITIES_ALL.indexOf(c)>=0;}) : CITIES_ALL.slice();
+
   var idx = sel.indexOf(city);
+
   if (idx>=0) sel.splice(idx,1); else sel.push(city);
+
   if (!sel.length) sel = CITIES_ALL.slice();
+
   var el = document.createElement('input'); el.id='comp-cities'; el.type='hidden'; el.value=sel.join(',');
+
   var old = document.getElementById('comp-cities');
+
   if (old) old.parentNode.replaceChild(el,old); else document.body.appendChild(el);
+
   document.getElementById('pane-comparison').dataset.done='';
+
   renderComparison();
+
 }
+
 window.toggleCompCity = toggleCompCity;
 
+
+
 function toggleCompKpi(k) {
+
   var raw = (document.getElementById('comp-kpis')||{value:''}).value||'';
+
   var sel = raw ? raw.split(',').filter(function(x){return x;}) : ['sp'];
+
   var idx = sel.indexOf(k);
+
   if (idx>=0) sel.splice(idx,1); else sel.push(k);
+
   if (!sel.length) sel = ['sp'];
+
   var el = document.createElement('input'); el.id='comp-kpis'; el.type='hidden'; el.value=sel.join(',');
+
   var old = document.getElementById('comp-kpis');
+
   if (old) old.parentNode.replaceChild(el,old); else document.body.appendChild(el);
+
   document.getElementById('pane-comparison').dataset.done='';
+
   renderComparison();
+
 }
+
 window.toggleCompKpi = toggleCompKpi;
 
+
+
 // ── CHART TOOLTIP (HTML floating div) ────────────────────────────────────────
+
 function showCTip(evt, rectEl) {
+
   var tip = document.getElementById('ctip');
+
   if (!tip) return;
+
   try {
+
     var d = JSON.parse(rectEl.getAttribute('data-tip'));
+
     var rows = [
+
       {label:'Spends',      color:'#3B82F6', val: d.sp ? INR(d.sp) : '—'},
+
       {label:'Trig. Leads', color:'#7C3AED', val: d.gl ? NUM(d.gl) : '—'},
+
       {label:'Dealer Trig.',color:'#059669', val: d.dt ? NUM(d.dt) : '—'},
+
       {label:'TCPL',        color:'#F59E0B', val: d.tcpl ? INR(d.tcpl) : '—'},
+
       {label:'Dealer CPL',  color:'#EF4444', val: d.dcpl ? INR(d.dcpl) : '—'}
+
     ];
+
     var inner = '<div style="padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.15);white-space:nowrap">'
+
       +'<span style="font-weight:700;font-size:13px">'+d.d+'</span>'
+
       +'<span style="opacity:.55;font-size:11px;margin-left:7px">'+d.c+'</span>'
+
       +'</div>';
+
     rows.forEach(function(row){
+
       inner += '<div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;margin-top:3px">'
+
         +'<span style="color:'+row.color+';font-weight:600">'+row.label+'</span>'
+
         +'<span style="font-weight:700">'+row.val+'</span>'
+
         +'</div>';
+
     });
+
     tip.innerHTML = inner;
+
     var x=evt.clientX+16, y=evt.clientY-30;
+
     if(x+220>window.innerWidth) x=evt.clientX-230;
+
     if(y+140>window.innerHeight) y=evt.clientY-140;
+
     tip.style.left=x+'px';
+
     tip.style.top=y+'px';
+
     tip.style.display='block';
+
   } catch(e) {}
+
 }
+
 function hideCTip() {
+
   var tip = document.getElementById('ctip');
+
   if (tip) tip.style.display = 'none';
+
 }
+
 window.showCTip = showCTip;
+
 window.hideCTip = hideCTip;
 
+
+
 // ── OVERVIEW ─────────────────────────────────────────────────────────────────
+
 function renderOverview() {
+
   var el=document.getElementById('pane-overview');
+
   if(el.dataset.done) return;
+
+
 
   if(!DATA.length) { el.innerHTML=noDataMsg(); el.dataset.done=1; return; }
 
+
+
   var tot=agg(DATA);
+
   var pcpl=cpl(tot.sp,tot.cv), gcpl_v=cpl(tot.sp,tot.gl), dcpl_v=cpl(tot.sp,tot.dt);
+
   var pctr=ctr(tot.cl,tot.imp), pcpm=cpm(tot.sp,tot.imp);
 
+
+
   var html='<div class="summary">';
+
   [['Total Spends',INR(tot.sp),'All cities combined'],
+
    ['Impressions',NUM(tot.imp),''],
+
    ['Clicks',NUM(tot.cl),'CTR: '+PCT(pctr)],
+
    ['Panel Conversions',fmtN(tot.cv),'Panel CPL: '+fmt(pcpl,0)],
+
    ['Triggered Leads',NUM(tot.gl),'Gen CPL: '+fmt(gcpl_v,0)],
+
    ['Dealer Triggers',NUM(tot.dt),'Dealer CPL: '+fmt(dcpl_v,0)],
+
    ['CPM (₹)',fmtN(pcpm),'Cost per 1000 impressions']
+
   ].forEach(function(c) {
+
     html+='<div class="sum-card"><div class="sum-label">'+c[0]+'</div><div class="sum-val">'+c[1]+'</div><div class="sum-sub">'+c[2]+'</div></div>';
+
   });
+
   html+='</div>';
+
+
 
   html+='<div class="city-grid">';
+
   ['Ahmedabad','Chandigarh','Nashik'].forEach(function(city) {
+
     var rows=DATA.filter(function(r){return r.City===city;});
+
     if(!rows.length) return;
+
     var t=agg(rows); var cc=CITY_COLOR[city]; var cl_v=CITY_LIGHT[city];
+
     var gcpl_c=cpl(t.sp,t.gl), dcpl_c=cpl(t.sp,t.dt), pcpl_c=cpl(t.sp,t.cv);
+
     var pct_sp=tot.sp>0?t.sp/tot.sp*100:0;
+
     html+='<div class="city-card">';
+
     html+='<div class="city-hdr" style="background:'+cl_v+';border-bottom:2px solid '+cc+'">';
+
     html+='<div class="city-dot" style="background:'+cc+'"></div>';
+
     html+='<div class="city-hdr-name" style="color:'+cc+'">'+city+'</div>';
+
     html+='<div class="city-hdr-total" style="color:'+cc+'">'+INR(t.sp)+'</div>';
+
     html+='</div><div class="city-body">';
+
     html+='<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:5px">SPEND SHARE</div>';
+
     html+='<div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="width:'+pct_sp.toFixed(1)+'%;height:100%;background:'+cc+';border-radius:3px"></div></div>';
+
     html+='<div style="font-size:11px;color:var(--text2);margin-top:3px">'+pct_sp.toFixed(1)+'% of total</div></div>';
+
     html+='<div class="metric-grid">';
+
     [['Impressions',NUM(t.imp),''],
+
      ['Clicks',NUM(t.cl),'CTR '+PCT(ctr(t.cl,t.imp))],
+
      ['Panel Conv.',fmtN(t.cv),'CPL '+fmt(pcpl_c,0)],
+
      ['Triggered Leads',NUM(t.gl),'CPL '+fmt(gcpl_c,0)],
+
      ['Dealer Triggers',NUM(t.dt),'CPL '+fmt(dcpl_c,0)],
+
      ['CPM',fmt(cpm(t.sp,t.imp),1),'Per 1k impr.']
+
     ].forEach(function(m) {
+
       html+='<div class="metric"><div class="metric-label">'+m[0]+'</div><div class="metric-val">'+m[1]+'</div><div class="metric-sub">'+m[2]+'</div></div>';
+
     });
+
     html+='</div></div></div>';
+
   });
+
   html+='</div>';
 
+
+
   html+='<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">Platform Split — All Cities</span></div>';
+
   html+='<div class="tbl-wrap"><table><thead><tr>';
+
   html+='<th class="left sticky" style="left:0">Platform</th>';
+
   ['Spends','Impressions','Clicks','CTR','Panel Conv.','Triggered Leads','Dealer Triggers','Trigger %','Panel CPL','TCPL','Dealer CPL'].forEach(function(k){html+='<th>'+k+'</th>';});
+
   html+='</tr></thead><tbody>';
+
   ['Google','Meta'].forEach(function(plat) {
+
     var rows=DATA.filter(function(r){return r.Platform===plat;});
+
     if(!rows.length) return;
+
     var t=agg(rows); var tpct=t.gl>0?t.dt/t.gl:null;
+
     html+='<tr><td class="left sticky" style="left:0">'+platBadge(plat)+'</td>';
+
     html+='<td>'+INR(t.sp)+'</td><td>'+NUM(t.imp)+'</td><td>'+NUM(t.cl)+'</td>';
+
     html+='<td>'+PCT(ctr(t.cl,t.imp))+'</td><td>'+fmtN(t.cv)+'</td>';
+
     html+='<td>'+NUM(t.gl)+'</td><td>'+NUM(t.dt)+'</td>';
+
     html+='<td>'+(tpct!=null?PCT(tpct):'—')+'</td>';
+
     html+='<td>'+fmt(cpl(t.sp,t.cv),0)+'</td><td>'+fmt(cpl(t.sp,t.gl),0)+'</td><td>'+fmt(cpl(t.sp,t.dt),0)+'</td></tr>';
+
   });
+
   var tt=agg(DATA); var ttpct=tt.gl>0?tt.dt/tt.gl:null;
+
   html+='</tbody><tfoot><tr><td class="left sticky" style="left:0">TOTAL</td>';
+
   html+='<td>'+INR(tt.sp)+'</td><td>'+NUM(tt.imp)+'</td><td>'+NUM(tt.cl)+'</td>';
+
   html+='<td>'+PCT(ctr(tt.cl,tt.imp))+'</td><td>'+fmtN(tt.cv)+'</td>';
+
   html+='<td>'+NUM(tt.gl)+'</td><td>'+NUM(tt.dt)+'</td>';
+
   html+='<td>'+(ttpct!=null?PCT(ttpct):'—')+'</td>';
+
   html+='<td>'+fmt(cpl(tt.sp,tt.cv),0)+'</td><td>'+fmt(cpl(tt.sp,tt.gl),0)+'</td><td>'+fmt(cpl(tt.sp,tt.dt),0)+'</td>';
+
   html+='</tr></tfoot></table></div></div>';
+
+
 
   el.innerHTML=html;
+
   el.dataset.done=1;
+
 }
 
+
+
 // ── CITY COMPARISON ───────────────────────────────────────────────────────────
+
 function renderCity() {
+
   var el=document.getElementById('pane-city');
+
   if(!DATA.length) { el.innerHTML=noDataMsg(); return; }
+
   var html='';
 
+
+
   html+='<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">City-wise Summary</span><span class="tbl-sub">All platforms combined</span></div>';
+
   html+='<div class="tbl-wrap"><table><thead><tr>';
+
   html+='<th class="left sticky" style="left:0">City</th>';
+
   ['Spends','Impressions','Clicks','CTR','Panel Conv.','Triggered Leads','Dealer Triggers','Trigger %','Panel CPL','TCPL','Dealer CPL'].forEach(function(k){html+='<th>'+k+'</th>';});
+
   html+='</tr></thead><tbody>';
+
   ['Ahmedabad','Chandigarh','Nashik'].forEach(function(city) {
+
     var rows=DATA.filter(function(r){return r.City===city;});
+
     if(!rows.length) return;
+
     var t=agg(rows); var tpct=t.gl>0?t.dt/t.gl:null;
+
     html+='<tr><td class="left sticky" style="left:0">'+cityBadge(city)+'</td>';
+
     html+='<td>'+INR(t.sp)+'</td><td>'+NUM(t.imp)+'</td><td>'+NUM(t.cl)+'</td>';
+
     html+='<td>'+PCT(ctr(t.cl,t.imp))+'</td><td>'+fmtN(t.cv)+'</td>';
+
     html+='<td>'+NUM(t.gl)+'</td><td>'+NUM(t.dt)+'</td>';
+
     html+='<td>'+(tpct!=null?PCT(tpct):'—')+'</td>';
+
     html+='<td>'+fmt(cpl(t.sp,t.cv),0)+'</td><td>'+fmt(cpl(t.sp,t.gl),0)+'</td><td>'+fmt(cpl(t.sp,t.dt),0)+'</td></tr>';
+
   });
+
   var tt=agg(DATA); var ttpct=tt.gl>0?tt.dt/tt.gl:null;
+
   html+='</tbody><tfoot><tr><td class="left sticky" style="left:0">TOTAL</td>';
+
   html+='<td>'+INR(tt.sp)+'</td><td>'+NUM(tt.imp)+'</td><td>'+NUM(tt.cl)+'</td>';
+
   html+='<td>'+PCT(ctr(tt.cl,tt.imp))+'</td><td>'+fmtN(tt.cv)+'</td>';
+
   html+='<td>'+NUM(tt.gl)+'</td><td>'+NUM(tt.dt)+'</td>';
+
   html+='<td>'+(ttpct!=null?PCT(ttpct):'—')+'</td>';
+
   html+='<td>'+fmt(cpl(tt.sp,tt.cv),0)+'</td><td>'+fmt(cpl(tt.sp,tt.gl),0)+'</td><td>'+fmt(cpl(tt.sp,tt.dt),0)+'</td>';
+
   html+='</tr></tfoot></table></div></div>';
 
+
+
   html+='<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Platform Split per City</span></div>';
+
   html+='<div class="tbl-wrap"><table><thead><tr>';
+
   html+='<th class="left sticky" style="left:0;min-width:100px">City</th>';
+
   html+='<th class="left sticky" style="left:100px;min-width:80px">Platform</th>';
+
   ['Spends','Impressions','Clicks','CTR','Panel Conv.','Triggered Leads','Dealer Triggers','Trigger %','Panel CPL','TCPL','Dealer CPL'].forEach(function(k){html+='<th>'+k+'</th>';});
+
   html+='</tr></thead><tbody>';
+
   ['Ahmedabad','Chandigarh','Nashik'].forEach(function(city) {
+
     ['Google','Meta'].forEach(function(plat) {
+
       var rows=DATA.filter(function(r){return r.City===city&&r.Platform===plat;});
+
       if(!rows.length) return;
+
       var t=agg(rows); var tpct=t.gl>0?t.dt/t.gl:null;
+
       html+='<tr><td class="left sticky" style="left:0;min-width:100px">'+cityBadge(city)+'</td>';
+
       html+='<td class="left sticky" style="left:100px;min-width:80px">'+platBadge(plat)+'</td>';
+
       html+='<td>'+INR(t.sp)+'</td><td>'+NUM(t.imp)+'</td><td>'+NUM(t.cl)+'</td>';
+
       html+='<td>'+PCT(ctr(t.cl,t.imp))+'</td><td>'+fmtN(t.cv)+'</td>';
+
       html+='<td>'+NUM(t.gl)+'</td><td>'+NUM(t.dt)+'</td>';
+
       html+='<td>'+(tpct!=null?PCT(tpct):'—')+'</td>';
+
       html+='<td>'+fmt(cpl(t.sp,t.cv),0)+'</td><td>'+fmt(cpl(t.sp,t.gl),0)+'</td><td>'+fmt(cpl(t.sp,t.dt),0)+'</td></tr>';
+
     });
+
   });
+
   html+='</tbody></table></div></div>';
 
-  // ── Weekly Organic vs Marketing Leads by City ─────────────────
   html += buildWeeklyOrgTable();
 
   el.innerHTML=html;
+
 }
+
+
+
 
 function weekMonday(dateStr) {
   var d = new Date(dateStr + 'T00:00:00');
-  var day = d.getDay(); // 0=Sun
+  var day = d.getDay();
   var diff = (day === 0) ? -6 : 1 - day;
   d.setDate(d.getDate() + diff);
   return d.toISOString().substring(0, 10);
@@ -3516,20 +5164,17 @@ function cityFromCampaign(camp) {
 
 function buildWeeklyOrgTable() {
   var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
-  // week → city → {org, mkt}
   var weeks = {};
   function ensureWeek(w, city) {
     if (!weeks[w]) weeks[w] = {};
     if (!weeks[w][city]) weeks[w][city] = {org:0, mkt:0};
   }
-
   DATA_ORGANIC.forEach(function(d) {
     if (!d.Date || !d.City) return;
     var w = weekMonday(d.Date);
     ensureWeek(w, d.City);
     weeks[w][d.City].org += (d.Organic_Leads || 0);
   });
-
   DATA_TRIGGERS.forEach(function(d) {
     if (!d.Date) return;
     var city = cityFromCampaign(d.Campaign || '');
@@ -3538,215 +5183,372 @@ function buildWeeklyOrgTable() {
     ensureWeek(w, city);
     weeks[w][city].mkt += (d.Dealer_Triggers || 0);
   });
-
   var weekKeys = Object.keys(weeks).sort();
   if (!weekKeys.length && !DATA_ORGANIC.length) return '';
-
-  var html = '<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Week-wise Organic &amp; Marketing Leads by City</span><span class="tbl-sub">Organic = Triggers_Organic sheet · Marketing = Dealer Triggers from Triggers sheet</span></div>';
+  var html = '<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Week-wise Organic &amp; Marketing Leads by City</span><span class="tbl-sub">Organic = Triggers_Organic sheet &middot; Marketing = Dealer Triggers</span></div>';
   html += '<div class="tbl-wrap"><table><thead><tr><th class="left sticky" style="left:0;min-width:110px">Week (Mon)</th>';
-  CITIES.forEach(function(c) {
-    html += '<th colspan="2" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>';
-  });
+  CITIES.forEach(function(c) { html += '<th colspan="2" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>'; });
   html += '</tr><tr><th class="left sticky" style="left:0"></th>';
-  CITIES.forEach(function() {
-    html += '<th style="font-size:11px;color:var(--text2);border-left:2px solid var(--border2)">Organic</th><th style="font-size:11px;color:var(--text2)">Mktg (Dealer)</th>';
-  });
+  CITIES.forEach(function() { html += '<th style="font-size:11px;color:var(--text2);border-left:2px solid var(--border2)">Organic</th><th style="font-size:11px;color:var(--text2)">Mktg (Dealer)</th>'; });
   html += '</tr></thead><tbody>';
-
   weekKeys.forEach(function(w) {
-    html += '<tr><td class="left sticky" style="left:0;font-size:12px;color:var(--text2)">'+w+'</td>';
+    html += '<tr><td class="left sticky" style="left:0;font-size:12px;color:var(--text2)">' + w + '</td>';
     CITIES.forEach(function(c) {
       var v = weeks[w][c] || {org:0, mkt:0};
-      html += '<td style="border-left:2px solid var(--border2)">'+(v.org||'—')+'</td><td>'+(v.mkt||'—')+'</td>';
+      html += '<td style="border-left:2px solid var(--border2)">' + (v.org || '—') + '</td><td>' + (v.mkt || '—') + '</td>';
     });
     html += '</tr>';
   });
-
-  // Totals row
   var totals = {};
   CITIES.forEach(function(c) { totals[c] = {org:0, mkt:0}; });
-  weekKeys.forEach(function(w) {
-    CITIES.forEach(function(c) {
-      if (weeks[w][c]) { totals[c].org += weeks[w][c].org; totals[c].mkt += weeks[w][c].mkt; }
-    });
-  });
+  weekKeys.forEach(function(w) { CITIES.forEach(function(c) { if (weeks[w][c]) { totals[c].org += weeks[w][c].org; totals[c].mkt += weeks[w][c].mkt; } }); });
   html += '<tfoot><tr><td class="left sticky" style="left:0;font-weight:700">Total</td>';
-  CITIES.forEach(function(c) {
-    html += '<td style="font-weight:700;border-left:2px solid var(--border2)">'+(totals[c].org||'—')+'</td><td style="font-weight:700">'+(totals[c].mkt||'—')+'</td>';
-  });
+  CITIES.forEach(function(c) { html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (totals[c].org || '—') + '</td><td style="font-weight:700">' + (totals[c].mkt || '—') + '</td>'; });
   html += '</tr></tfoot></table></div></div>';
   return html;
 }
 
 // ── CAMPAIGN DETAIL ───────────────────────────────────────────────────────────
+
 function renderCampaigns() {
+
   var el=document.getElementById('pane-campaigns');
+
   var cityF=document.getElementById('f-city')? document.getElementById('f-city').value : 'All';
+
   var platF=document.getElementById('f-plat')? document.getElementById('f-plat').value : 'All';
+
   var typeF=document.getElementById('f-type')? document.getElementById('f-type').value : 'All';
 
+
+
   var rows=DATA.filter(function(r) {
+
     return (cityF==='All'||r.City===cityF)&&(platF==='All'||r.Platform===platF)&&(typeF==='All'||r.Type===typeF);
+
   });
+
+
 
   var html='<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">All Campaigns</span>';
+
   html+='<div class="filters">';
+
   html+='<select id="f-city" class="fsel" onchange="renderCampaigns()"><option value="All">All Cities</option>';
+
   ['Ahmedabad','Chandigarh','Nashik'].forEach(function(c){html+='<option'+(c===cityF?' selected':'')+'>'+c+'</option>';});
+
   html+='</select>';
+
   html+='<select id="f-plat" class="fsel" onchange="renderCampaigns()"><option value="All">All Platforms</option>';
+
   ['Google','Meta'].forEach(function(p){html+='<option'+(p===platF?' selected':'')+'>'+p+'</option>';});
+
   html+='</select>';
+
   html+='<select id="f-type" class="fsel" onchange="renderCampaigns()"><option value="All">All Types</option>';
+
   var types=[...new Set(DATA.map(function(r){return r.Type;}))].sort();
+
   types.forEach(function(t){html+='<option'+(t===typeF?' selected':'')+'>'+t+'</option>';});
+
   html+='</select></div></div>';
 
+
+
   if(!rows.length) {
+
     html+=noDataMsg()+'</div>';
+
     el.innerHTML=html;
+
     return;
+
   }
 
+
+
   html+='<div class="tbl-wrap"><table><thead><tr>';
+
   html+='<th class="left sticky" style="left:0;min-width:90px">City</th>';
+
   html+='<th class="left sticky" style="left:90px;min-width:78px">Platform</th>';
+
   html+='<th class="left sticky" style="left:168px;min-width:110px">Type</th>';
+
   html+='<th class="left" style="min-width:110px">Stage</th>';
+
   html+='<th class="left" style="min-width:180px">Campaign</th>';
+
   ['Spends','Impressions','Clicks','CTR','Panel Conv.','Triggered Leads','Dealer Triggers','Trigger %','Panel CPL','TCPL','Dealer CPL'].forEach(function(k){html+='<th>'+k+'</th>';});
+
   html+='</tr></thead><tbody>';
+
+
 
   rows.forEach(function(r) {
+
     var pcpl_r=cpl(r.Spends,r.Conversions), gcpl_r=cpl(r.Spends,r.Triggered_Leads), dcpl_r=cpl(r.Spends,r.Dealer_Triggers);
+
     var pctr_r=ctr(r.Clicks,r.Impressions); var tpct_r=r.Triggered_Leads>0?r.Dealer_Triggers/r.Triggered_Leads:null;
+
     html+='<tr>';
+
     html+='<td class="left sticky" style="left:0;min-width:90px">'+cityBadge(r.City)+'</td>';
+
     html+='<td class="left sticky" style="left:90px;min-width:78px">'+platBadge(r.Platform)+'</td>';
+
     html+='<td class="left sticky" style="left:168px;min-width:110px">'+typeBadge(r.Type)+'</td>';
+
     html+='<td class="left" style="min-width:110px">'+statusBadge(r.Status||'')+'</td>';
+
     html+='<td class="left" style="min-width:180px;max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--text2)" title="'+r.Campaign+'">'+r.Campaign+'</td>';
+
     html+='<td>'+INR(r.Spends)+'</td><td>'+NUM(r.Impressions)+'</td><td>'+NUM(r.Clicks)+'</td>';
+
     html+='<td>'+PCT(pctr_r)+'</td><td>'+fmtN(r.Conversions)+'</td>';
+
     html+='<td>'+(r.Type==='LeadForm'?'—':NUM(r.Triggered_Leads))+'</td>';
+
     if (r.Type === 'LeadForm') {
+
       var _cid = r.Campaign.replace(/[^a-zA-Z0-9]/g, '_');
+
       var _esc = r.Campaign.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
       html+='<td><input type="number" id="wa_dt_'+_cid+'" value="'+r.Dealer_Triggers+'" min="0" title="Enter dealer trigger count manually" style="width:62px;border:1.5px solid #CBD5E1;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right;background:var(--card);color:var(--text1)" onchange="updateWaDt(this,\''+_esc+'\')" /></td>';
+
     } else {
+
       html+='<td>'+NUM(r.Dealer_Triggers)+'</td>';
+
     }
+
     html+='<td>'+(tpct_r!=null?PCT(tpct_r):'—')+'</td>';
+
     html+='<td>'+fmt(pcpl_r,0)+'</td>';
+
     html+='<td>'+(r.Type==='LeadForm'?'—':fmt(gcpl_r,0))+'</td>';
+
     html+='<td>'+fmt(dcpl_r,0)+'</td></tr>';
+
   });
+
+
 
   var t=agg(rows); var ftpct=t.gl>0?t.dt/t.gl:null;
+
   html+='</tbody><tfoot><tr><td class="left sticky" style="left:0;min-width:90px" colspan="3">TOTAL</td><td></td><td class="left">('+rows.length+' campaigns)</td>';
+
   html+='<td>'+INR(t.sp)+'</td><td>'+NUM(t.imp)+'</td><td>'+NUM(t.cl)+'</td>';
+
   html+='<td>'+PCT(ctr(t.cl,t.imp))+'</td><td>'+fmtN(t.cv)+'</td>';
+
   html+='<td>'+NUM(t.gl)+'</td><td>'+NUM(t.dt)+'</td>';
+
   html+='<td>'+(ftpct!=null?PCT(ftpct):'—')+'</td>';
+
   html+='<td>'+fmt(cpl(t.sp,t.cv),0)+'</td><td>'+fmt(cpl(t.sp,t.gl),0)+'</td><td>'+fmt(cpl(t.sp,t.dt),0)+'</td>';
+
   html+='</tr></tfoot></table></div></div>';
 
+
+
   el.innerHTML=html;
+
 }
+
 window.renderCampaigns = renderCampaigns;
 
+
+
 // ── CAMPAIGN TYPE ANALYSIS (removed) ─────────────────────────────────────────
+
 function renderTypes() {
+
   var el=document.getElementById('pane-types');
+
   if(!el||!DATA.length) return;
+
   var types=[...new Set(DATA.map(function(r){return r.Type;}))].sort();
+
   var cities=['Ahmedabad','Chandigarh','Nashik'];
+
   var html='';
 
+
+
   html+='<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">Campaign Type Summary</span><span class="tbl-sub">All cities combined by type</span></div>';
+
   html+='<div class="tbl-wrap"><table><thead><tr>';
+
   html+='<th class="left sticky" style="left:0;min-width:130px">Type</th>';
+
   html+='<th class="left sticky" style="left:130px;min-width:100px">Platform</th>';
+
   html+='<th class="left" style="min-width:110px">Stage</th>';
+
   ['Spends','Impressions','Clicks','CTR','Panel Conv.','Triggered Leads','Dealer Triggers','Trigger %','Panel CPL','TCPL','Dealer CPL'].forEach(function(k){html+='<th>'+k+'</th>';});
+
   html+='</tr></thead><tbody>';
+
   types.forEach(function(type) {
+
     var rows=DATA.filter(function(r){return r.Type===type;});
+
     var t=agg(rows); var tpct=t.gl>0?t.dt/t.gl:null;
+
     var plats=[...new Set(rows.map(function(r){return r.Platform;}))];
+
     var statuses=[...new Set(rows.map(function(r){return r.Status||'';}).filter(Boolean))];
+
     html+='<tr>';
+
     html+='<td class="left sticky" style="left:0;min-width:130px">'+typeBadge(type)+'</td>';
+
     html+='<td class="left sticky" style="left:130px;min-width:100px">'+plats.map(platBadge).join(' ')+'</td>';
+
     html+='<td class="left" style="min-width:110px">'+statuses.map(statusBadge).join(' ')+'</td>';
+
     html+='<td>'+INR(t.sp)+'</td><td>'+NUM(t.imp)+'</td><td>'+NUM(t.cl)+'</td>';
+
     html+='<td>'+PCT(ctr(t.cl,t.imp))+'</td><td>'+fmtN(t.cv)+'</td>';
+
     html+='<td>'+(t.gl>0?NUM(t.gl):'—')+'</td><td>'+NUM(t.dt)+'</td>';
+
     html+='<td>'+(tpct!=null?PCT(tpct):'—')+'</td>';
+
     html+='<td>'+fmt(cpl(t.sp,t.cv),0)+'</td>';
+
     html+='<td>'+(t.gl>0?fmt(cpl(t.sp,t.gl),0):'—')+'</td>';
+
     html+='<td>'+fmt(cpl(t.sp,t.dt),0)+'</td></tr>';
+
   });
+
   var tt=agg(DATA); var ttpct2=tt.gl>0?tt.dt/tt.gl:null;
+
   html+='</tbody><tfoot><tr><td class="left sticky" style="left:0" colspan="2">TOTAL</td><td></td>';
+
   html+='<td>'+INR(tt.sp)+'</td><td>'+NUM(tt.imp)+'</td><td>'+NUM(tt.cl)+'</td>';
+
   html+='<td>'+PCT(ctr(tt.cl,tt.imp))+'</td><td>'+fmtN(tt.cv)+'</td>';
+
   html+='<td>'+NUM(tt.gl)+'</td><td>'+NUM(tt.dt)+'</td>';
+
   html+='<td>'+(ttpct2!=null?PCT(ttpct2):'—')+'</td>';
+
   html+='<td>'+fmt(cpl(tt.sp,tt.cv),0)+'</td><td>'+fmt(cpl(tt.sp,tt.gl),0)+'</td><td>'+fmt(cpl(tt.sp,tt.dt),0)+'</td>';
+
   html+='</tr></tfoot></table></div></div>';
 
+
+
   html+='<div style="margin-top:20px;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px">City comparison within each campaign type</div>';
+
   html+='<div class="type-grid">';
+
   types.forEach(function(type) {
+
     var typeRows=DATA.filter(function(r){return r.Type===type;});
+
     var cityTots={}; cities.forEach(function(city){ var cr=typeRows.filter(function(r){return r.City===city;}); cityTots[city]=agg(cr); });
+
     var plats=[...new Set(typeRows.map(function(r){return r.Platform;}))];
+
     var maxSp=Math.max.apply(null, cities.map(function(c){return cityTots[c].sp;}));
+
     html+='<div class="type-card"><div class="type-hdr"><div class="type-icon" style="background:'+TYPE_LIGHT[type]+'">';
+
     html+=type==='Search'?'🔍':type==='Catalogue'?'📋':type==='LeadForm'?'📝':type==='Demand Gen'?'📣':type==='Performance Max'?'⚡':type==='Website Conversion'?'🌐':type==='YouTube'?'▶️':'💬';
+
     html+='</div><div><div class="type-hdr-name">'+type+'</div>';
+
     html+='<div class="type-hdr-plat" style="color:var(--text2)">'+plats.map(function(p){return '<span style="color:'+PLAT_COLOR[p]+'">'+p+'</span>';}).join(' · ')+'</div></div></div>';
+
     html+='<div class="type-body">';
+
     cities.forEach(function(city) {
+
       var t=cityTots[city]; if(!t.sp&&!t.gl&&!t.cv) return;
+
       var pct=maxSp>0?t.sp/maxSp*100:0; var cc=CITY_COLOR[city];
+
       html+='<div class="type-city-row" style="border-color:'+CITY_BORDER[city]+';background:'+CITY_LIGHT[city]+'10">';
+
       html+='<div class="tcr-name" style="color:'+cc+'">'+city+'</div>';
+
       html+='<div class="tcr-bar-wrap"><div class="tcr-bar" style="width:'+pct+'%;background:'+cc+'"></div></div>';
+
       html+='<div class="tcr-vals"><span>Sp: <strong>'+INR(t.sp)+'</strong></span>';
+
       if(t.gl>0) html+='<span>GL: <strong>'+t.gl+'</strong></span>';
+
       if(t.cv>0) html+='<span>Conv: <strong>'+fmtN(t.cv)+'</strong></span>';
+
       html+='</div></div>';
+
     });
+
     html+='</div></div>';
+
   });
+
   html+='</div>';
 
+
+
   html+='<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">CPL by Type × City</span><span class="tbl-sub">Spends ÷ Gen Leads (— where no leads)</span></div>';
+
   html+='<div class="tbl-wrap"><table><thead><tr><th class="left">Campaign Type</th>';
+
   cities.forEach(function(c){html+='<th>'+c+'</th>';});
+
   html+='<th>Combined</th></tr></thead><tbody>';
+
   types.forEach(function(type) {
+
     html+='<tr><td class="left">'+typeBadge(type)+'</td>';
+
     var allRows=DATA.filter(function(r){return r.Type===type;}); var tot2=agg(allRows);
+
     cities.forEach(function(city) {
+
       var cr=DATA.filter(function(r){return r.Type===type&&r.City===city;}); var t=agg(cr);
+
       html+='<td>'+fmt(cpl(t.sp,t.gl),0)+'</td>';
+
     });
+
     html+='<td style="font-weight:700">'+fmt(cpl(tot2.sp,tot2.gl),0)+'</td></tr>';
+
   });
+
   html+='</tbody></table></div></div>';
 
+
+
   el.innerHTML=html;
+
 }
 
+
+
 function initDashboard() {
+
   if(document.getElementById('pane-overview').dataset.done) return;
+
   renderOverview();
+
 }
+
 window.initDashboard = initDashboard;
+
 window.resetDateFilter = resetDateFilter;
+
 </script>
+
 </body>
+
 </html>
+
