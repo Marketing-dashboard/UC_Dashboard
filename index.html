@@ -5035,17 +5035,233 @@ function renderOverview() {
 
 // ── CITY COMPARISON ───────────────────────────────────────────────────────────
 
+// Split a date range into 7-day week chunks (weeks defined by selected range, not ISO calendar)
+function getDateRangeWeeks(s, e) {
+  if (!s || !e || s > e) return [];
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var weeks = [];
+  var cur = s;
+  while (cur <= e) {
+    var d = new Date(cur + 'T00:00:00');
+    var endD = new Date(cur + 'T00:00:00');
+    endD.setDate(endD.getDate() + 6);
+    var wEnd = endD.toISOString().substring(0, 10);
+    if (wEnd > e) wEnd = e;
+    var sD = new Date(cur + 'T00:00:00');
+    var eD = new Date(wEnd + 'T00:00:00');
+    var label = sD.getDate() + ' ' + MONTHS[sD.getMonth()] + ' – ' + eD.getDate() + ' ' + MONTHS[eD.getMonth()];
+    weeks.push({key: cur, start: cur, end: wEnd, label: label});
+    endD.setDate(endD.getDate() + 1);
+    cur = endD.toISOString().substring(0, 10);
+    if (cur > e) break;
+  }
+  return weeks;
+}
+
+function cityFromCampaign(camp) {
+  var lc = camp.toLowerCase();
+  if (lc.indexOf('ahm') !== -1 || lc.indexOf('ahmedabad') !== -1) return 'Ahmedabad';
+  if (lc.indexOf('chd') !== -1 || lc.indexOf('chandigarh') !== -1) return 'Chandigarh';
+  if (lc.indexOf('nashik') !== -1 || lc.indexOf('nasik') !== -1) return 'Nashik';
+  return null;
+}
+
+// Top table: week × city, Organic+Mktg combined and Mktg (dealer) separately
+function buildWeeklyOrgTable(s, e) {
+  var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
+  var weeks = getDateRangeWeeks(s, e);
+  if (!weeks.length) return '';
+
+  // data[weekKey][city] = {org, mkt}
+  var data = {};
+  weeks.forEach(function(w) {
+    data[w.key] = {};
+    CITIES.forEach(function(c) { data[w.key][c] = {org:0, mkt:0}; });
+  });
+
+  DATA_ORGANIC.forEach(function(d) {
+    if (!d.Date || !d.City) return;
+    var w = weeks.find(function(wk) { return d.Date >= wk.start && d.Date <= wk.end; });
+    if (!w || !data[w.key][d.City]) return;
+    data[w.key][d.City].org += (d.Organic_Leads || 0);
+  });
+
+  DATA_TRIGGERS.forEach(function(d) {
+    if (!d.Date) return;
+    var city = cityFromCampaign(d.Campaign || '');
+    if (!city) return;
+    var w = weeks.find(function(wk) { return d.Date >= wk.start && d.Date <= wk.end; });
+    if (!w || !data[w.key][city]) return;
+    data[w.key][city].mkt += (d.Dealer_Triggers || 0);
+  });
+
+  var html = '<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">Week-wise Organic &amp; Marketing Leads by City</span><span class="tbl-sub">Organic = Triggers_Organic sheet &middot; Mktg = Dealer Triggers &middot; weeks defined by selected date range</span></div>';
+  html += '<div class="tbl-wrap"><table><thead><tr>';
+  html += '<th class="left sticky" style="left:0;min-width:130px">Week</th>';
+  CITIES.forEach(function(c) {
+    html += '<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>';
+  });
+  html += '<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">Total</th>';
+  html += '</tr><tr><th class="left sticky" style="left:0"></th>';
+  var subCols = ['Organic','Mktg (Dealer)','Org+Mktg'];
+  for (var ci = 0; ci < 4; ci++) {
+    subCols.forEach(function(sc, si) {
+      html += '<th style="font-size:11px;color:var(--text2);' + (si===0 ? 'border-left:2px solid var(--border2)' : '') + '">' + sc + '</th>';
+    });
+  }
+  html += '</tr></thead><tbody>';
+
+  var grandTotals = {org:0, mkt:0};
+  var cityTotals = {};
+  CITIES.forEach(function(c) { cityTotals[c] = {org:0, mkt:0}; });
+
+  weeks.forEach(function(w) {
+    html += '<tr><td class="left sticky" style="left:0;font-size:12px;color:var(--text2);white-space:nowrap">' + w.label + '</td>';
+    var rowOrg = 0, rowMkt = 0;
+    CITIES.forEach(function(c) {
+      var v = data[w.key][c] || {org:0, mkt:0};
+      var combined = v.org + v.mkt;
+      cityTotals[c].org += v.org;
+      cityTotals[c].mkt += v.mkt;
+      rowOrg += v.org; rowMkt += v.mkt;
+      html += '<td style="border-left:2px solid var(--border2)">' + (v.org || '—') + '</td>';
+      html += '<td>' + (v.mkt || '—') + '</td>';
+      html += '<td style="font-weight:600;color:var(--lead)">' + (combined || '—') + '</td>';
+    });
+    grandTotals.org += rowOrg; grandTotals.mkt += rowMkt;
+    html += '<td style="border-left:2px solid var(--border2);font-weight:600">' + (rowOrg || '—') + '</td>';
+    html += '<td style="font-weight:600">' + (rowMkt || '—') + '</td>';
+    html += '<td style="font-weight:700;color:var(--lead)">' + ((rowOrg+rowMkt) || '—') + '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody><tfoot><tr><td class="left sticky" style="left:0;font-weight:700">Total</td>';
+  CITIES.forEach(function(c) {
+    html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (cityTotals[c].org || '—') + '</td>';
+    html += '<td style="font-weight:700">' + (cityTotals[c].mkt || '—') + '</td>';
+    html += '<td style="font-weight:700;color:var(--lead)">' + ((cityTotals[c].org + cityTotals[c].mkt) || '—') + '</td>';
+  });
+  html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (grandTotals.org || '—') + '</td>';
+  html += '<td style="font-weight:700">' + (grandTotals.mkt || '—') + '</td>';
+  html += '<td style="font-weight:700;color:var(--lead)">' + ((grandTotals.org + grandTotals.mkt) || '—') + '</td>';
+  html += '</tr></tfoot></table></div></div>';
+  return html;
+}
+
+// Second table: week × city campaign performance (spends, triggered leads, dealer triggers)
+function buildWeeklyCityPerfTable(s, e) {
+  var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
+  var weeks = getDateRangeWeeks(s, e);
+  if (!weeks.length || !DATA_DAILY.length) return '';
+
+  // Build camp→city lookup
+  var campToCity = {};
+  DATA_RAW.forEach(function(r) { campToCity[r.Campaign] = r.City; });
+
+  // data[weekKey][city] = {sp, gl, dt}
+  var data = {};
+  weeks.forEach(function(w) {
+    data[w.key] = {};
+    CITIES.forEach(function(c) { data[w.key][c] = {sp:0, gl:0, dt:0}; });
+  });
+
+  DATA_DAILY.forEach(function(d) {
+    if (!d.Date) return;
+    var city = campToCity[d.Campaign];
+    if (!city) return;
+    var w = weeks.find(function(wk) { return d.Date >= wk.start && d.Date <= wk.end; });
+    if (!w || !data[w.key][city]) return;
+    data[w.key][city].sp += (d.Spends || 0);
+  });
+
+  DATA_TRIGGERS.forEach(function(d) {
+    if (!d.Date) return;
+    var city = cityFromCampaign(d.Campaign || '');
+    if (!city) return;
+    var w = weeks.find(function(wk) { return d.Date >= wk.start && d.Date <= wk.end; });
+    if (!w || !data[w.key][city]) return;
+    data[w.key][city].gl += (d.Triggered_Leads || 0);
+    data[w.key][city].dt += (d.Dealer_Triggers || 0);
+  });
+
+  var html = '<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Week-wise City Campaign Performance</span><span class="tbl-sub">Spends · Triggered Leads · Dealer Triggers</span></div>';
+  html += '<div class="tbl-wrap"><table><thead><tr>';
+  html += '<th class="left sticky" style="left:0;min-width:130px">Week</th>';
+  CITIES.forEach(function(c) {
+    html += '<th colspan="4" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>';
+  });
+  html += '<th colspan="4" style="text-align:center;border-left:2px solid var(--border2)">Total</th>';
+  html += '</tr><tr><th class="left sticky" style="left:0"></th>';
+  var perfCols = ['Spends','Trig. Leads','Dealer Trig.','Dealer CPL'];
+  for (var pi = 0; pi < 4; pi++) {
+    perfCols.forEach(function(pc, psi) {
+      html += '<th style="font-size:11px;color:var(--text2);' + (psi===0 ? 'border-left:2px solid var(--border2)' : '') + '">' + pc + '</th>';
+    });
+  }
+  html += '</tr></thead><tbody>';
+
+  var cityTotals = {};
+  CITIES.forEach(function(c) { cityTotals[c] = {sp:0, gl:0, dt:0}; });
+
+  weeks.forEach(function(w) {
+    html += '<tr><td class="left sticky" style="left:0;font-size:12px;color:var(--text2);white-space:nowrap">' + w.label + '</td>';
+    var rowSp = 0, rowGl = 0, rowDt = 0;
+    CITIES.forEach(function(c) {
+      var v = data[w.key][c] || {sp:0, gl:0, dt:0};
+      cityTotals[c].sp += v.sp; cityTotals[c].gl += v.gl; cityTotals[c].dt += v.dt;
+      rowSp += v.sp; rowGl += v.gl; rowDt += v.dt;
+      var dcpl = v.sp > 0 && v.dt > 0 ? Math.round(v.sp / v.dt) : null;
+      html += '<td style="border-left:2px solid var(--border2)">' + (v.sp ? INR(v.sp) : '—') + '</td>';
+      html += '<td>' + (v.gl || '—') + '</td>';
+      html += '<td>' + (v.dt || '—') + '</td>';
+      html += '<td>' + (dcpl ? '₹' + dcpl.toLocaleString('en-IN') : '—') + '</td>';
+    });
+    var rowDcpl = rowSp > 0 && rowDt > 0 ? Math.round(rowSp / rowDt) : null;
+    html += '<td style="border-left:2px solid var(--border2);font-weight:600">' + (rowSp ? INR(rowSp) : '—') + '</td>';
+    html += '<td style="font-weight:600">' + (rowGl || '—') + '</td>';
+    html += '<td style="font-weight:600">' + (rowDt || '—') + '</td>';
+    html += '<td style="font-weight:600">' + (rowDcpl ? '₹' + rowDcpl.toLocaleString('en-IN') : '—') + '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody><tfoot><tr><td class="left sticky" style="left:0;font-weight:700">Total</td>';
+  var grandSp = 0, grandGl = 0, grandDt = 0;
+  CITIES.forEach(function(c) {
+    var dcpl = cityTotals[c].sp > 0 && cityTotals[c].dt > 0 ? Math.round(cityTotals[c].sp / cityTotals[c].dt) : null;
+    grandSp += cityTotals[c].sp; grandGl += cityTotals[c].gl; grandDt += cityTotals[c].dt;
+    html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (cityTotals[c].sp ? INR(cityTotals[c].sp) : '—') + '</td>';
+    html += '<td style="font-weight:700">' + (cityTotals[c].gl || '—') + '</td>';
+    html += '<td style="font-weight:700">' + (cityTotals[c].dt || '—') + '</td>';
+    html += '<td style="font-weight:700">' + (dcpl ? '₹' + dcpl.toLocaleString('en-IN') : '—') + '</td>';
+  });
+  var grandDcpl = grandSp > 0 && grandDt > 0 ? Math.round(grandSp / grandDt) : null;
+  html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (grandSp ? INR(grandSp) : '—') + '</td>';
+  html += '<td style="font-weight:700">' + (grandGl || '—') + '</td>';
+  html += '<td style="font-weight:700">' + (grandDt || '—') + '</td>';
+  html += '<td style="font-weight:700">' + (grandDcpl ? '₹' + grandDcpl.toLocaleString('en-IN') : '—') + '</td>';
+  html += '</tr></tfoot></table></div></div>';
+  return html;
+}
+
 function renderCity() {
 
   var el=document.getElementById('pane-city');
 
   if(!DATA.length) { el.innerHTML=noDataMsg(); return; }
 
+  var _s = document.getElementById('date-start').value;
+  var _e = document.getElementById('date-end').value;
+
   var html='';
 
+  // ── 1. Weekly Organic + Marketing leads by city (TOP) ──
+  html += buildWeeklyOrgTable(_s, _e);
 
+  // ── 2. Weekly city campaign performance ──
+  html += buildWeeklyCityPerfTable(_s, _e);
 
-  html+='<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">City-wise Summary</span><span class="tbl-sub">All platforms combined</span></div>';
+  // ── 3. City-wise aggregate summary ──
+  html+='<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">City-wise Summary</span><span class="tbl-sub">All platforms combined · selected period</span></div>';
 
   html+='<div class="tbl-wrap"><table><thead><tr>';
 
@@ -5093,8 +5309,7 @@ function renderCity() {
 
   html+='</tr></tfoot></table></div></div>';
 
-
-
+  // ── 4. Platform split per city ──
   html+='<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Platform Split per City</span></div>';
 
   html+='<div class="tbl-wrap"><table><thead><tr>';
@@ -5137,90 +5352,8 @@ function renderCity() {
 
   html+='</tbody></table></div></div>';
 
-  var _s = document.getElementById('date-start').value;
-  var _e = document.getElementById('date-end').value;
-  html += buildWeeklyOrgTable(_s, _e);
-
   el.innerHTML=html;
 
-}
-
-
-
-
-function weekMonday(dateStr) {
-  var d = new Date(dateStr + 'T00:00:00');
-  var day = d.getDay();
-  var diff = (day === 0) ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().substring(0, 10);
-}
-
-function weekLabel(mondayStr) {
-  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var mon = new Date(mondayStr + 'T00:00:00');
-  var sun = new Date(mondayStr + 'T00:00:00');
-  sun.setDate(sun.getDate() + 6);
-  var fmt = function(d) { return d.getDate() + ' ' + MONTHS[d.getMonth()]; };
-  return fmt(mon) + ' – ' + fmt(sun);
-}
-
-function cityFromCampaign(camp) {
-  var lc = camp.toLowerCase();
-  if (lc.indexOf('ahm') !== -1 || lc.indexOf('ahmedabad') !== -1) return 'Ahmedabad';
-  if (lc.indexOf('chd') !== -1 || lc.indexOf('chandigarh') !== -1) return 'Chandigarh';
-  if (lc.indexOf('nashik') !== -1 || lc.indexOf('nasik') !== -1) return 'Nashik';
-  return null;
-}
-
-function buildWeeklyOrgTable(s, e) {
-  var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
-  var weeks = {};
-  function ensureWeek(w, city) {
-    if (!weeks[w]) weeks[w] = {};
-    if (!weeks[w][city]) weeks[w][city] = {org:0, mkt:0};
-  }
-  DATA_ORGANIC.forEach(function(d) {
-    if (!d.Date || !d.City) return;
-    if (s && d.Date < s) return;
-    if (e && d.Date > e) return;
-    var w = weekMonday(d.Date);
-    ensureWeek(w, d.City);
-    weeks[w][d.City].org += (d.Organic_Leads || 0);
-  });
-  DATA_TRIGGERS.forEach(function(d) {
-    if (!d.Date) return;
-    if (s && d.Date < s) return;
-    if (e && d.Date > e) return;
-    var city = cityFromCampaign(d.Campaign || '');
-    if (!city) return;
-    var w = weekMonday(d.Date);
-    ensureWeek(w, city);
-    weeks[w][city].mkt += (d.Dealer_Triggers || 0);
-  });
-  var weekKeys = Object.keys(weeks).sort();
-  if (!weekKeys.length && !DATA_ORGANIC.length) return '';
-  var html = '<div class="tbl-card" style="margin-top:16px"><div class="tbl-toolbar"><span class="tbl-title">Week-wise Organic &amp; Marketing Leads by City</span><span class="tbl-sub">Organic = Triggers_Organic sheet &middot; Marketing = Dealer Triggers</span></div>';
-  html += '<div class="tbl-wrap"><table><thead><tr><th class="left sticky" style="left:0;min-width:110px">Week (Mon)</th>';
-  CITIES.forEach(function(c) { html += '<th colspan="2" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>'; });
-  html += '</tr><tr><th class="left sticky" style="left:0"></th>';
-  CITIES.forEach(function() { html += '<th style="font-size:11px;color:var(--text2);border-left:2px solid var(--border2)">Organic</th><th style="font-size:11px;color:var(--text2)">Mktg (Dealer)</th>'; });
-  html += '</tr></thead><tbody>';
-  weekKeys.forEach(function(w) {
-    html += '<tr><td class="left sticky" style="left:0;font-size:12px;color:var(--text2)">' + weekLabel(w) + '</td>';
-    CITIES.forEach(function(c) {
-      var v = weeks[w][c] || {org:0, mkt:0};
-      html += '<td style="border-left:2px solid var(--border2)">' + (v.org || '—') + '</td><td>' + (v.mkt || '—') + '</td>';
-    });
-    html += '</tr>';
-  });
-  var totals = {};
-  CITIES.forEach(function(c) { totals[c] = {org:0, mkt:0}; });
-  weekKeys.forEach(function(w) { CITIES.forEach(function(c) { if (weeks[w][c]) { totals[c].org += weeks[w][c].org; totals[c].mkt += weeks[w][c].mkt; } }); });
-  html += '<tfoot><tr><td class="left sticky" style="left:0;font-weight:700;min-width:140px">Total</td>';
-  CITIES.forEach(function(c) { html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (totals[c].org || '—') + '</td><td style="font-weight:700">' + (totals[c].mkt || '—') + '</td>'; });
-  html += '</tr></tfoot></table></div></div>';
-  return html;
 }
 
 // ── CAMPAIGN DETAIL ───────────────────────────────────────────────────────────
