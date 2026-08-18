@@ -5137,7 +5137,9 @@ function renderCity() {
 
   html+='</tbody></table></div></div>';
 
-  html += buildWeeklyOrgTable();
+  var _s = document.getElementById('date-start').value;
+  var _e = document.getElementById('date-end').value;
+  html += buildWeeklyOrgTable(_s, _e);
 
   el.innerHTML=html;
 
@@ -5162,7 +5164,7 @@ function cityFromCampaign(camp) {
   return null;
 }
 
-function buildWeeklyOrgTable() {
+function buildWeeklyOrgTable(s, e) {
   var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
   var weeks = {};
   function ensureWeek(w, city) {
@@ -5171,12 +5173,16 @@ function buildWeeklyOrgTable() {
   }
   DATA_ORGANIC.forEach(function(d) {
     if (!d.Date || !d.City) return;
+    if (s && d.Date < s) return;
+    if (e && d.Date > e) return;
     var w = weekMonday(d.Date);
     ensureWeek(w, d.City);
     weeks[w][d.City].org += (d.Organic_Leads || 0);
   });
   DATA_TRIGGERS.forEach(function(d) {
     if (!d.Date) return;
+    if (s && d.Date < s) return;
+    if (e && d.Date > e) return;
     var city = cityFromCampaign(d.Campaign || '');
     if (!city) return;
     var w = weekMonday(d.Date);
