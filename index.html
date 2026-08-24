@@ -5095,15 +5095,17 @@ function buildWeeklyOrgTable(s, e) {
     data[w.key][city].mkt += (d.Dealer_Triggers || 0);
   });
 
+  function pct(mkt, total) { return total > 0 ? (mkt / total * 100).toFixed(1) + '%' : '—'; }
+
   var html = '<div class="tbl-card"><div class="tbl-toolbar"><span class="tbl-title">Week-wise Organic &amp; Marketing Leads by City</span><span class="tbl-sub">Organic = Triggers_Organic sheet &middot; Mktg = Dealer Triggers &middot; weeks defined by selected date range</span></div>';
   html += '<div class="tbl-wrap"><table><thead><tr>';
   html += '<th class="left sticky" style="left:0;min-width:130px">Week</th>';
   CITIES.forEach(function(c) {
-    html += '<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>';
+    html += '<th colspan="4" style="text-align:center;border-left:2px solid var(--border2)">' + c + '</th>';
   });
-  html += '<th colspan="3" style="text-align:center;border-left:2px solid var(--border2)">Total</th>';
+  html += '<th colspan="4" style="text-align:center;border-left:2px solid var(--border2)">Total</th>';
   html += '</tr><tr><th class="left sticky" style="left:0"></th>';
-  var subCols = ['Organic','Mktg (Dealer)','Org+Mktg'];
+  var subCols = ['Organic','Mktg (Dealer)','Org+Mktg','Mktg Contr.%'];
   for (var ci = 0; ci < 4; ci++) {
     subCols.forEach(function(sc, si) {
       html += '<th style="font-size:11px;color:var(--text2);' + (si===0 ? 'border-left:2px solid var(--border2)' : '') + '">' + sc + '</th>';
@@ -5127,23 +5129,30 @@ function buildWeeklyOrgTable(s, e) {
       html += '<td style="border-left:2px solid var(--border2)">' + (v.org || '—') + '</td>';
       html += '<td>' + (v.mkt || '—') + '</td>';
       html += '<td style="font-weight:600;color:var(--lead)">' + (combined || '—') + '</td>';
+      html += '<td style="font-size:12px;color:var(--text2)">' + pct(v.mkt, combined) + '</td>';
     });
     grandTotals.org += rowOrg; grandTotals.mkt += rowMkt;
+    var rowTotal = rowOrg + rowMkt;
     html += '<td style="border-left:2px solid var(--border2);font-weight:600">' + (rowOrg || '—') + '</td>';
     html += '<td style="font-weight:600">' + (rowMkt || '—') + '</td>';
-    html += '<td style="font-weight:700;color:var(--lead)">' + ((rowOrg+rowMkt) || '—') + '</td>';
+    html += '<td style="font-weight:700;color:var(--lead)">' + (rowTotal || '—') + '</td>';
+    html += '<td style="font-size:12px;color:var(--text2)">' + pct(rowMkt, rowTotal) + '</td>';
     html += '</tr>';
   });
 
   html += '</tbody><tfoot><tr><td class="left sticky" style="left:0;font-weight:700">Total</td>';
   CITIES.forEach(function(c) {
+    var ct = cityTotals[c].org + cityTotals[c].mkt;
     html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (cityTotals[c].org || '—') + '</td>';
     html += '<td style="font-weight:700">' + (cityTotals[c].mkt || '—') + '</td>';
-    html += '<td style="font-weight:700;color:var(--lead)">' + ((cityTotals[c].org + cityTotals[c].mkt) || '—') + '</td>';
+    html += '<td style="font-weight:700;color:var(--lead)">' + (ct || '—') + '</td>';
+    html += '<td style="font-weight:700;font-size:12px">' + pct(cityTotals[c].mkt, ct) + '</td>';
   });
+  var gt = grandTotals.org + grandTotals.mkt;
   html += '<td style="font-weight:700;border-left:2px solid var(--border2)">' + (grandTotals.org || '—') + '</td>';
   html += '<td style="font-weight:700">' + (grandTotals.mkt || '—') + '</td>';
-  html += '<td style="font-weight:700;color:var(--lead)">' + ((grandTotals.org + grandTotals.mkt) || '—') + '</td>';
+  html += '<td style="font-weight:700;color:var(--lead)">' + (gt || '—') + '</td>';
+  html += '<td style="font-weight:700;font-size:12px">' + pct(grandTotals.mkt, gt) + '</td>';
   html += '</tr></tfoot></table></div></div>';
   return html;
 }
