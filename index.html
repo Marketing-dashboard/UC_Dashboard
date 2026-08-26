@@ -5039,20 +5039,24 @@ function renderOverview() {
 function getDateRangeWeeks(s, e) {
   if (!s || !e || s > e) return [];
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Use local date string to avoid UTC timezone shift in toISOString()
+  function localStr(d) {
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
   var weeks = [];
   var cur = s;
   while (cur <= e) {
-    var d = new Date(cur + 'T00:00:00');
+    var startD = new Date(cur + 'T00:00:00');
     var endD = new Date(cur + 'T00:00:00');
-    endD.setDate(endD.getDate() + 6);
-    var wEnd = endD.toISOString().substring(0, 10);
-    if (wEnd > e) wEnd = e;
-    var sD = new Date(cur + 'T00:00:00');
-    var eD = new Date(wEnd + 'T00:00:00');
-    var label = sD.getDate() + ' ' + MONTHS[sD.getMonth()] + ' – ' + eD.getDate() + ' ' + MONTHS[eD.getMonth()];
+    endD.setDate(endD.getDate() + 6);          // +6 days = 7-day week
+    var wEnd = localStr(endD);
+    if (wEnd > e) { endD = new Date(e + 'T00:00:00'); wEnd = e; }
+    var label = startD.getDate() + ' ' + MONTHS[startD.getMonth()] + ' – ' + endD.getDate() + ' ' + MONTHS[endD.getMonth()];
     weeks.push({key: cur, start: cur, end: wEnd, label: label});
-    endD.setDate(endD.getDate() + 1);
-    cur = endD.toISOString().substring(0, 10);
+    endD.setDate(endD.getDate() + 1);          // next week starts the day after
+    cur = localStr(endD);
     if (cur > e) break;
   }
   return weeks;
