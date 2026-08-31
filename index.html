@@ -14125,7 +14125,7 @@ function applyDateFilter() {
 
   if (activeTab) {
 
-    var ids = ['city','campaigns','types','comparison'];
+    var ids = ['city','campaigns','comparison'];
 
     document.querySelectorAll('.tab').forEach(function(t, i) {
 
@@ -14303,7 +14303,7 @@ function switchTab(id) {
 
   document.querySelectorAll('.tab').forEach(function(t,i) {
 
-    var ids=['overview','city','campaigns','types','comparison'];
+    var ids=['city','campaigns','comparison'];
 
     t.classList.toggle('active', ids[i]===id);
 
