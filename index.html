@@ -5072,7 +5072,7 @@ function cityFromCampaign(camp) {
 
 // Top table: week × city, Organic+Mktg combined and Mktg (dealer) separately
 function buildWeeklyOrgTable(s, e) {
-  var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
+  var CITIES = ['Ahmedabad','Nashik','Chandigarh'];
   var weeks = getDateRangeWeeks(s, e);
   if (!weeks.length) return '';
 
@@ -5163,7 +5163,7 @@ function buildWeeklyOrgTable(s, e) {
 
 // Second table: week × city campaign performance (spends, triggered leads, dealer triggers)
 function buildWeeklyCityPerfTable(s, e) {
-  var CITIES = ['Ahmedabad','Chandigarh','Nashik'];
+  var CITIES = ['Ahmedabad','Nashik','Chandigarh'];
   var weeks = getDateRangeWeeks(s, e);
   if (!weeks.length || !DATA_DAILY.length) return '';
 
